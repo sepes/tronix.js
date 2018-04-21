@@ -5,10 +5,7 @@ describe('http client', () => {
 
   // return;
 
-  let client = new HttpClient({
-    hostname: "tronscan.io",
-    port: 80,
-  });
+  let client = new HttpClient();
 
   it('show latest block', async () => {
     let latestBlock = await client.getLatestBlock();

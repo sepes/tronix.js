@@ -316,6 +316,17 @@ class HttpClient {
     const blocks = await Promise.all(blocksPromises);
     return blocks;
   }
+
+  /**
+   * Retrieve account info
+   * @returns {Promise<*>}
+   */
+  async getAccount(address) {
+    let {data} = await xhr.post(`${this.url}/queryAccount`, qs.stringify({ address }));
+    let bytesAccount = base64DecodeFromString(data);
+    let account = Account.deserializeBinary(bytesAccount);
+    return account.toObject();
+  }
 }
 
 module.exports = HttpClient;

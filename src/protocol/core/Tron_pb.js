@@ -105,7 +105,7 @@ proto.protocol.Account.toObject = function(includeInstance, msg) {
     votesList: jspb.Message.toObjectList(msg.getVotesList(),
     proto.protocol.Account.Vote.toObject, includeInstance),
     assetMap: (f = msg.getAssetMap()) ? f.toObject(includeInstance, undefined) : [],
-    latestOprationTime: jspb.Message.getFieldWithDefault(msg, 10, 0)
+    latestOperationTime: jspb.Message.getFieldWithDefault(msg, 10, 0)
   };
 
   if (includeInstance) {
