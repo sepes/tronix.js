@@ -3,7 +3,7 @@ const assert = require("assert");
 
 describe('http client', () => {
 
-  return;
+  // return;
 
   let client = new HttpClient({
     hostname: "tronscan.io",
@@ -15,11 +15,14 @@ describe('http client', () => {
   });
 
   it('show latest 7 blocks', async () => {
-    let latestBlock = await client.getLatestBlock();
-    for (let i = 0; i < 7; i++) {
-      let block = await client.getBlockByNum(latestBlock.number - i);
-      console.log("BLOCK", block);
-    }
+    let lastBlocks = await client.getLastBlocks(2);
+    lastBlocks.forEach(block => {
+      console.log("BLOCK: ", block.number);
+    });
+  });
+
+  it('show account info', async () => {
+    let accountInfo = await client.getAccount('27SY3bmDpWTJEMGCzbRbbtEvjTMgzDibC8C');
   });
 
 });

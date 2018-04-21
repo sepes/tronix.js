@@ -302,6 +302,20 @@ class HttpClient {
 
     return await this.signTransaction(password, data);
   }
+
+  /**
+   * get latest blocks
+   * @returns {Promise<*>}
+   */
+  async getLastBlocks(limit = 10) {
+    const blocksPromises = [];
+    const lastBlock = await this.getLatestBlock();
+    for (let i = 0; i < limit; i += 1) {
+      blocksPromises.push(this.getBlockByNum(lastBlock.number - i));
+    }
+    const blocks = await Promise.all(blocksPromises);
+    return blocks;
+  }
 }
 
 module.exports = HttpClient;
