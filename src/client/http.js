@@ -322,10 +322,16 @@ class HttpClient {
    * @returns {Promise<*>}
    */
   async getAccount(address) {
-    let {data} = await xhr.post(`${this.url}/queryAccount`, qs.stringify({ address }));
-    let bytesAccount = base64DecodeFromString(data);
-    let account = Account.deserializeBinary(bytesAccount);
-    return account.toObject();
+    const {data} = await xhr.post(`${this.url}/queryAccount`, qs.stringify({ address }));
+    if (data) {
+      const bytesAccount = base64DecodeFromString(data);
+      const accountDeserialized = Account.deserializeBinary(bytesAccount);
+      const account = accountDeserialized.toObject(); 
+      // we have to translate the address
+      account.address = getBase58CheckAddress(Array.from(accountDeserialized.getAddress()))
+      return account;
+    }
+    return null;
   }
 }
 
