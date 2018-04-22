@@ -327,8 +327,12 @@ class HttpClient {
       const bytesAccount = base64DecodeFromString(data);
       const accountDeserialized = Account.deserializeBinary(bytesAccount);
       const account = accountDeserialized.toObject(); 
-      // we have to translate the address
-      account.address = getBase58CheckAddress(Array.from(accountDeserialized.getAddress()))
+      // we have to translate the addresses
+      account.address = getBase58CheckAddress(Array.from(accountDeserialized.getAddress()));
+      account.votesList.map(vote => {
+        vote.voteAddress = passwordToAddress(vote.voteAddress);
+        return vote;
+      });
       return account;
     }
     return null;
