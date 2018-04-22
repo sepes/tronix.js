@@ -36,7 +36,7 @@ When there is a running `wallet-cli` application use `npm` to run the tests
 Install the package
 
 ```bash
-> npm install @tronprotocol/wallet-api
+> npm install https://github.com/deblanco/node-wallet-api
 ```
 
 Use the HTTP Client
@@ -66,3 +66,7 @@ let latestBlock = await Client.getLatestBlock();
 * [TRON Protocol](https://github.com/tronprotocol/protocol)
 * [Wallet Client](https://github.com/tronprotocol/wallet-cli)
 * [Wallet Web](https://github.com/tronprotocol/Wallet_Web)
+
+# Authors
+* [Santiago de los Santos](http://github.com/santiagodls)
+* [Daniel Blanco](https://github.com/deblanco)
