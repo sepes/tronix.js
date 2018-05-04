@@ -9,7 +9,7 @@ class GrpcClient {
 
   constructor(options) {
     this.hostname = options.hostname;
-    this.port = options.port;
+    this.port = options.port || 50051;
 
     const {WalletClient} = require("../protocol/api/api_grpc_pb");
     const caller = require('grpc-caller');
@@ -81,6 +81,15 @@ class GrpcClient {
     return account;
   }
 
+  // async getAccountTransactions(address) {
+  //   let accountArg = new Account();
+  //   accountArg.setAddress(address);
+
+  //   const accountRaw = await this.api.getTransactionsToThis(accountArg);
+  //   const account = accountRaw.toObject();
+  //   return account;
+  // }
+
   /**
    * Retrieves a block by the given number
    *
@@ -120,7 +129,7 @@ class GrpcClient {
       return deserializeTransaction(tx)[0];
     });
     lastBlock.transactionsCount = lastBlock.transactionsList.length;
-    lastBlock.totalTrx = lastBlock.transactionsList.reduce((t, n) => t + n.amount, 0);
+    lastBlock.totalTrx = lastBlock.transactionsList.reduce((t, n) => t + ((n && n.amount) ? n.amount : 0), 0);
     lastBlock.size = lastBlock.blockHeader.witnessSignature.length;
     lastBlock.time = rawData.getTimestamp();
     lastBlock.witnessAddress = getBase58CheckAddress(Array.from(rawData.getWitnessAddress())),
