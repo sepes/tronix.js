@@ -106,7 +106,7 @@ class GrpcClient {
       return deserializeTransaction(tx)[0];
     });
     block.transactionsCount = block.transactionsList.length;
-    block.totalTrx = block.transactionsList.reduce((t, n) => t + n.amount, 0);
+    block.totalTrx = block.transactionsList.reduce((t, n) => t + ((n && n.amount) ? n.amount : 0), 0);
     block.size = block.blockHeader.witnessSignature.length;
     block.time = rawData.getTimestamp();
     block.witnessAddress = getBase58CheckAddress(Array.from(rawData.getWitnessAddress())),
