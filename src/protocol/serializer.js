@@ -41,6 +41,7 @@ function deserializeTransaction(tx) {
           from: ownerHex,
           to: toHex,
           amount,
+          time: tx.getRawData().getTimestamp(),
         });
       }
       break;

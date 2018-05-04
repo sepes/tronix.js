@@ -67,3 +67,5 @@ typings/
 
 ./protocol
 test/playground.js
+
+.DS_Store
