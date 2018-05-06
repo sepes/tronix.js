@@ -40,6 +40,27 @@ class GrpcClient {
       .then(x => x.getNodesList());
   }
 
+  async getAssets() {
+    const assetsListRaw = await this.api.getAssetIssueList(new EmptyMessage())
+    .then(x => x.getAssetissueList());
+    const assetsList = assetsListRaw.map(ai => {
+      return {
+        ownerAddress: getBase58CheckAddress(Array.from(ai.getOwnerAddress())),
+        url: bytesToString(ai.getUrl()),
+        name: bytesToString(ai.getName()),
+        description: bytesToString(ai.getDescription()),
+        startTime: ai.getStartTime(),
+        endTime: ai.getEndTime(),
+        voteScore: ai.getVoteScore(),
+        totalSupply: ai.getTotalSupply(),
+        trxNum: ai.getTrxNum() / 1000,
+        decayRatio: ai.getDecayRatio(),
+        num: ai.getNum(),
+      };
+    });
+    return assetsList;
+  }
+
   /**
    * Retrieve all accounts
    *
@@ -73,12 +94,18 @@ class GrpcClient {
    * @returns {Promise<*>}
    */
   async getAccount(address) {
-    let accountArg = new Account();
-    accountArg.setAddress(address);
+    // Till get it working
+    // let accountArg = new Account();
+    // accountArg.setAddress(address);
 
-    const accountRaw = await this.api.getAccount(accountArg);
-    const account = accountRaw.toObject();
-    return account;
+    // const accountRaw = await this.api.getAccount(accountArg);
+    // const account = accountRaw.toObject();
+    // return account;
+
+    // WORKAROUND
+    const accounts = await this.getAccounts();
+    const accountRequested = accounts.find(acc => acc.address === address);
+    return accountRequested;
   }
 
   // async getAccountTransactions(address) {
