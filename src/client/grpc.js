@@ -26,8 +26,13 @@ class GrpcClient {
    * @returns {Promise<*>}
    */
   async getWitnesses() {
-    return await this.api.listWitnesses(new EmptyMessage())
+    const witnesses = await this.api.listWitnesses(new EmptyMessage())
       .then(x => x.getWitnessesList());
+    return witnesses.map(w =>{
+      const witness = w.toObject();
+      witness.address = getBase58CheckAddress(Array.from(w.getAddress()))
+      return witness;
+    });
   }
 
   /**
@@ -71,6 +76,9 @@ class GrpcClient {
       .then(x => x.getAccountsList());
       return accountList.map(account => {
         const computedAccount = account.toObject();
+        if (computedAccount.accountName.length > 0) {
+          computedAccount.accountName = getBase58CheckAddress(Array.from(account.getAccountName()));
+        }
         computedAccount.address = getBase58CheckAddress(Array.from(account.getAddress()));
         computedAccount.votesList.map(vote => {
           vote.voteAddress = passwordToAddress(vote.voteAddress);
