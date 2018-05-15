@@ -249,6 +249,17 @@ function deserialize_protocol_TransferContract(buffer_arg) {
   return core_Contract_pb.TransferContract.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_protocol_UnfreezeAssetContract(arg) {
+  if (!(arg instanceof core_Contract_pb.UnfreezeAssetContract)) {
+    throw new Error('Expected argument of type protocol.UnfreezeAssetContract');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_protocol_UnfreezeAssetContract(buffer_arg) {
+  return core_Contract_pb.UnfreezeAssetContract.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_protocol_UnfreezeBalanceContract(arg) {
   if (!(arg instanceof core_Contract_pb.UnfreezeBalanceContract)) {
     throw new Error('Expected argument of type protocol.UnfreezeBalanceContract');
@@ -468,6 +479,17 @@ var WalletService = exports.WalletService = {
     responseType: core_Tron_pb.Transaction,
     requestSerialize: serialize_protocol_UnfreezeBalanceContract,
     requestDeserialize: deserialize_protocol_UnfreezeBalanceContract,
+    responseSerialize: serialize_protocol_Transaction,
+    responseDeserialize: deserialize_protocol_Transaction,
+  },
+  unfreezeAsset: {
+    path: '/protocol.Wallet/UnfreezeAsset',
+    requestStream: false,
+    responseStream: false,
+    requestType: core_Contract_pb.UnfreezeAssetContract,
+    responseType: core_Tron_pb.Transaction,
+    requestSerialize: serialize_protocol_UnfreezeAssetContract,
+    requestDeserialize: deserialize_protocol_UnfreezeAssetContract,
     responseSerialize: serialize_protocol_Transaction,
     responseDeserialize: deserialize_protocol_Transaction,
   },

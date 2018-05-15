@@ -31,5 +31,8 @@
     "js-sha3": "^0.7.0",
     "mocha": "^5.1.0",
     "qs": "^6.5.1"
+  },
+  "devDependencies": {
+    "eslint-config-airbnb-base": "^12.1.0"
   }
 }

@@ -1,5 +1,5 @@
 const {EmptyMessage, NumberMessage} = require("../protocol/api/api_pb");
-const {getBase58CheckAddress, signTransaction, passwordToAddress} = require("../utils/crypto");
+const {getBase58CheckAddress, signTransaction, passwordToAddress, SHA256} = require("../utils/crypto");
 const {base64DecodeFromString, byteArray2hexStr, bytesToString} = require("../utils/bytes");
 const deserializeTransaction = require("../protocol/serializer").deserializeTransaction;
 const {Transaction, Account} = require("../protocol/core/Tron_pb");
@@ -116,15 +116,6 @@ class GrpcClient {
     return accountRequested;
   }
 
-  // async getAccountTransactions(address) {
-  //   let accountArg = new Account();
-  //   accountArg.setAddress(address);
-
-  //   const accountRaw = await this.api.getTransactionsToThis(accountArg);
-  //   const account = accountRaw.toObject();
-  //   return account;
-  // }
-
   /**
    * Retrieves a block by the given number
    *
@@ -142,7 +133,7 @@ class GrpcClient {
     });
     block.transactionsCount = block.transactionsList.length;
     block.totalTrx = block.transactionsList.reduce((t, n) => t + ((n && n.amount) ? n.amount : 0), 0);
-    block.size = block.blockHeader.witnessSignature.length;
+    block.size = blockRaw.serializeBinary().length;
     block.time = rawData.getTimestamp();
     block.witnessAddress = getBase58CheckAddress(Array.from(rawData.getWitnessAddress())),
     block.number = rawData.getNumber();

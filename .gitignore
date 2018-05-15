@@ -66,6 +66,7 @@ typings/
 .vscode
 
 ./protocol
+protocol
 test/playground.js
 
 .DS_Store

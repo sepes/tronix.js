@@ -1,4 +1,5 @@
-const getBase58CheckAddress = require("../utils/crypto").getBase58CheckAddress;
+const { getBase58CheckAddress, SHA256 } = require("../utils/crypto");
+const {base64DecodeFromString, byteArray2hexStr} = require("../utils/bytes");
 const {Block, Transaction} = require("../protocol/core/Tron_pb");
 const {TransferContract} = require("../protocol/core/Contract_pb");
 
@@ -37,7 +38,10 @@ function deserializeTransaction(tx) {
 
         let amount = obje.getAmount() / 1000000;
 
+        const hash = byteArray2hexStr(SHA256(tx.serializeBinary()));
+
         transactions.push({
+          hash: hash,
           from: ownerHex,
           to: toHex,
           amount,
