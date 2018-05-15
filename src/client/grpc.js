@@ -59,7 +59,6 @@ class GrpcClient {
         voteScore: ai.getVoteScore(),
         totalSupply: ai.getTotalSupply(),
         trxNum: ai.getTrxNum() / 1000,
-        decayRatio: ai.getDecayRatio(),
         num: ai.getNum(),
       };
     });
