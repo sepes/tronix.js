@@ -1,18 +1,17 @@
-const {EmptyMessage, NumberMessage} = require("../protocol/api/api_pb");
-const {getBase58CheckAddress, signTransaction, passwordToAddress, SHA256} = require("../utils/crypto");
-const {base64DecodeFromString, byteArray2hexStr, bytesToString} = require("../utils/bytes");
-const deserializeTransaction = require("../protocol/serializer").deserializeTransaction;
-const {Transaction, Account} = require("../protocol/core/Tron_pb");
-const stringToBytes = require("../lib/code").stringToBytes;
+const { EmptyMessage, NumberMessage } = require('../protocol/api/api_pb');
+const {
+  getBase58CheckAddress, passwordToAddress, decode58Check,
+} = require('../utils/crypto');
+const { byteArray2hexStr, bytesToString } = require('../utils/bytes');
+const { deserializeTransaction } = require('../protocol/serializer');
+const { Account } = require('../protocol/core/Tron_pb');
+const { WalletClient } = require('../protocol/api/api_grpc_pb');
+const caller = require('grpc-caller');
 
 class GrpcClient {
-
   constructor(options) {
     this.hostname = options.hostname;
     this.port = options.port || 50051;
-
-    const {WalletClient} = require("../protocol/api/api_grpc_pb");
-    const caller = require('grpc-caller');
 
     /**
      * @type {WalletClient}
@@ -28,9 +27,9 @@ class GrpcClient {
   async getWitnesses() {
     const witnesses = await this.api.listWitnesses(new EmptyMessage())
       .then(x => x.getWitnessesList());
-    return witnesses.map(w =>{
+    return witnesses.map((w) => {
       const witness = w.toObject();
-      witness.address = getBase58CheckAddress(Array.from(w.getAddress()))
+      witness.address = getBase58CheckAddress(Array.from(w.getAddress()));
       return witness;
     });
   }
@@ -47,52 +46,21 @@ class GrpcClient {
 
   async getAssets() {
     const assetsListRaw = await this.api.getAssetIssueList(new EmptyMessage())
-    .then(x => x.getAssetissueList());
-    const assetsList = assetsListRaw.map(ai => {
-      return {
-        ownerAddress: getBase58CheckAddress(Array.from(ai.getOwnerAddress())),
-        url: bytesToString(ai.getUrl()),
-        name: bytesToString(ai.getName()),
-        description: bytesToString(ai.getDescription()),
-        startTime: ai.getStartTime(),
-        endTime: ai.getEndTime(),
-        voteScore: ai.getVoteScore(),
-        totalSupply: ai.getTotalSupply(),
-        trxNum: ai.getTrxNum() / 1000,
-        num: ai.getNum(),
-      };
-    });
+      .then(x => x.getAssetissueList());
+    const assetsList = assetsListRaw.map(ai => ({
+      ownerAddress: getBase58CheckAddress(Array.from(ai.getOwnerAddress())),
+      url: bytesToString(ai.getUrl()),
+      name: bytesToString(ai.getName()),
+      description: bytesToString(ai.getDescription()),
+      startTime: ai.getStartTime(),
+      endTime: ai.getEndTime(),
+      voteScore: ai.getVoteScore(),
+      totalSupply: ai.getTotalSupply(),
+      trxNum: ai.getTrxNum() / 1000,
+      num: ai.getNum(),
+    }));
     return assetsList;
   }
-
-  /**
-   * Retrieve all accounts
-   *
-   * @returns {Promise<*>}
-   */
-  async getAccounts() {
-    const accountList = await this.api.listAccounts(new EmptyMessage())
-      .then(x => x.getAccountsList());
-      return accountList.map(account => {
-        const computedAccount = account.toObject();
-        if (computedAccount.accountName.length > 0) {
-          computedAccount.accountName = getBase58CheckAddress(Array.from(account.getAccountName()));
-        }
-        computedAccount.address = getBase58CheckAddress(Array.from(account.getAddress()));
-        computedAccount.votesList.map(vote => {
-          vote.voteAddress = passwordToAddress(vote.voteAddress);
-          return vote;
-        });
-        computedAccount.balance = account.getBalance() / 1000000;
-        computedAccount.assetMap = computedAccount.assetMap.map(asset => {
-          return {
-            name: asset[0],
-            balance: asset[1]
-          }
-        });
-        return computedAccount;
-      });
-    }
 
   /**
    * Retrieves a account by the given address
@@ -101,18 +69,24 @@ class GrpcClient {
    * @returns {Promise<*>}
    */
   async getAccount(address) {
-    // Till get it working
-    // let accountArg = new Account();
-    // accountArg.setAddress(address);
-
-    // const accountRaw = await this.api.getAccount(accountArg);
-    // const account = accountRaw.toObject();
-    // return account;
-
-    // WORKAROUND
-    const accounts = await this.getAccounts();
-    const accountRequested = accounts.find(acc => acc.address === address);
-    return accountRequested;
+    const accountArg = new Account();
+    accountArg.setAddress(new Uint8Array(decode58Check(address)));
+    const accountRaw = await this.api.getAccount(accountArg);
+    const account = accountRaw.toObject();
+    if (account.accountName.length > 0) {
+      account.accountName = bytesToString(Array.from(accountRaw.getAccountName()));
+    }
+    account.address = getBase58CheckAddress(Array.from(accountRaw.getAddress()));
+    account.votesList.map((vote) => {
+      vote.voteAddress = passwordToAddress(vote.voteAddress);
+      return vote;
+    });
+    account.balance = accountRaw.getBalance() / 1000000;
+    account.assetMap = account.assetMap.map(asset => ({
+      name: asset[0],
+      balance: asset[1],
+    }));
+    return account;
   }
 
   /**
@@ -122,14 +96,12 @@ class GrpcClient {
    * @returns {Promise<*>}
    */
   async getBlockByNumber(number) {
-    let message = new NumberMessage();
+    const message = new NumberMessage();
     message.setNum(number);
     const blockRaw = await this.api.getBlockByNum(message);
     const block = blockRaw.toObject();
     const rawData = blockRaw.getBlockHeader().getRawData();
-    block.transactionsList = blockRaw.getTransactionsList().map(tx => {
-      return deserializeTransaction(tx)[0];
-    });
+    block.transactionsList = blockRaw.getTransactionsList().map(tx => deserializeTransaction(tx)[0]);
     block.transactionsCount = block.transactionsList.length;
     block.totalTrx = block.transactionsList.reduce((t, n) => t + ((n && n.amount) ? n.amount : 0), 0);
     block.size = blockRaw.serializeBinary().length;
@@ -141,7 +113,7 @@ class GrpcClient {
     return block;
   }
 
-    /**
+  /**
    * Retrieve latest block
    *
    * @returns {Promise<*>}
@@ -150,12 +122,10 @@ class GrpcClient {
     const lastBlockRaw = await this.api.getNowBlock(new EmptyMessage());
     const lastBlock = lastBlockRaw.toObject();
     const rawData = lastBlockRaw.getBlockHeader().getRawData();
-    lastBlock.transactionsList = lastBlockRaw.getTransactionsList().map(tx => {
-      return deserializeTransaction(tx)[0];
-    });
+    lastBlock.transactionsList = lastBlockRaw.getTransactionsList().map(tx => deserializeTransaction(tx)[0]);
     lastBlock.transactionsCount = lastBlock.transactionsList.length;
     lastBlock.totalTrx = lastBlock.transactionsList.reduce((t, n) => t + ((n && n.amount) ? n.amount : 0), 0);
-    lastBlock.size = lastBlock.blockHeader.witnessSignature.length;
+    lastBlock.size = blockRaw.serializeBinary().length;
     lastBlock.time = rawData.getTimestamp();
     lastBlock.witnessAddress = getBase58CheckAddress(Array.from(rawData.getWitnessAddress())),
     lastBlock.number = rawData.getNumber();
@@ -163,7 +133,6 @@ class GrpcClient {
     delete lastBlock.blockHeader;
     return lastBlock;
   }
-
 }
 
 module.exports = GrpcClient;

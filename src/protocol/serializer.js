@@ -1,61 +1,63 @@
-const { getBase58CheckAddress, SHA256 } = require("../utils/crypto");
-const {base64DecodeFromString, byteArray2hexStr} = require("../utils/bytes");
-const {Block, Transaction} = require("../protocol/core/Tron_pb");
-const {TransferContract} = require("../protocol/core/Contract_pb");
+const { getBase58CheckAddress, SHA256 } = require('../utils/crypto');
+const { byteArray2hexStr } = require('../utils/bytes');
+const { Transaction } = require('../protocol/core/Tron_pb');
+const { TransferContract } = require('../protocol/core/Contract_pb');
 
 
 function deserializeTransaction(tx) {
-  let contractType = Transaction.Contract.ContractType;
+  const contractType = Transaction.Contract.ContractType;
 
-  let contractList = tx.getRawData().getContractList();
+  const contractList = tx.getRawData().getContractList();
 
-  let transactions = [];
+  const transactions = [];
 
-  for (let contract of contractList) {
-    let any = contract.getParameter();
+  contractList.forEach((contract) => {
+    const any = contract.getParameter();
 
     switch (contract.getType()) {
-
       case contractType.ACCOUNTCREATECONTRACT: {
         // contractType = contractType .ACCOUNTCREATECONTRACT;
 
-        let obje = any.unpack(AccountCreateContract.deserializeBinary, "protocol.AccountCreateContract");
+        const obje = any.unpack(AccountCreateContract.deserializeBinary, 'protocol.AccountCreateContract');
 
         transactions.push({});
       }
         break;
 
-      case contractType .TRANSFERCONTRACT: {
+      case contractType.TRANSFERCONTRACT: {
         // let contractType = contractType .TRANSFERCONTRACT;
 
-        let obje = any.unpack(TransferContract.deserializeBinary, "protocol.TransferContract");
+        const obje = any.unpack(TransferContract.deserializeBinary, 'protocol.TransferContract');
 
-        let owner = obje.getOwnerAddress();
-        let ownerHex = getBase58CheckAddress(Array.from(owner));
+        const owner = obje.getOwnerAddress();
+        const ownerHex = getBase58CheckAddress(Array.from(owner));
 
-        let to = obje.getToAddress();
-        let toHex = getBase58CheckAddress(Array.from(to));
+        const to = obje.getToAddress();
+        const toHex = getBase58CheckAddress(Array.from(to));
 
-        let amount = obje.getAmount() / 1000000;
+        const amount = obje.getAmount() / 1000000;
 
         const hash = byteArray2hexStr(SHA256(tx.serializeBinary()));
 
         transactions.push({
-          hash: hash,
+          hash,
           from: ownerHex,
           to: toHex,
           amount,
           time: tx.getRawData().getTimestamp(),
+          data: tx.data,
+          scripts: tx.scripts,
         });
       }
-      break;
+        break;
+      default:
+        break;
     }
-
-  }
+  });
 
   return transactions;
 }
 
 module.exports = {
-  deserializeTransaction
+  deserializeTransaction,
 };

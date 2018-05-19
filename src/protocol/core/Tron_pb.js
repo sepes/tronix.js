@@ -519,6 +519,7 @@ proto.protocol.Account.toObject = function(includeInstance, msg) {
     votesList: jspb.Message.toObjectList(msg.getVotesList(),
     proto.protocol.Vote.toObject, includeInstance),
     assetMap: (f = msg.getAssetMap()) ? f.toObject(includeInstance, undefined) : [],
+    latestAssetOperationTimeMap: (f = msg.getLatestAssetOperationTimeMap()) ? f.toObject(includeInstance, undefined) : [],
     frozenList: jspb.Message.toObjectList(msg.getFrozenList(),
     proto.protocol.Account.Frozen.toObject, includeInstance),
     bandwidth: jspb.Message.getFieldWithDefault(msg, 8, 0),
@@ -591,6 +592,12 @@ proto.protocol.Account.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 6:
       var value = msg.getAssetMap();
+      reader.readMessage(value, function(message, reader) {
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readInt64);
+         });
+      break;
+    case 18:
+      var value = msg.getLatestAssetOperationTimeMap();
       reader.readMessage(value, function(message, reader) {
         jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readInt64);
          });
@@ -709,6 +716,10 @@ proto.protocol.Account.serializeBinaryToWriter = function(message, writer) {
   f = message.getAssetMap(true);
   if (f && f.getLength() > 0) {
     f.serializeBinary(6, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeInt64);
+  }
+  f = message.getLatestAssetOperationTimeMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(18, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeInt64);
   }
   f = message.getFrozenList();
   if (f.length > 0) {
@@ -1115,6 +1126,24 @@ proto.protocol.Account.prototype.getAssetMap = function(opt_noLazyCreate) {
 
 proto.protocol.Account.prototype.clearAssetMap = function() {
   this.getAssetMap().clear();
+};
+
+
+/**
+ * map<string, int64> latest_asset_operation_time = 18;
+ * @param {boolean=} opt_noLazyCreate Do not create the map if
+ * empty, instead returning `undefined`
+ * @return {!jspb.Map<string,number>}
+ */
+proto.protocol.Account.prototype.getLatestAssetOperationTimeMap = function(opt_noLazyCreate) {
+  return /** @type {!jspb.Map<string,number>} */ (
+      jspb.Message.getMapField(this, 18, opt_noLazyCreate,
+      null));
+};
+
+
+proto.protocol.Account.prototype.clearLatestAssetOperationTimeMap = function() {
+  this.getLatestAssetOperationTimeMap().clear();
 };
 
 

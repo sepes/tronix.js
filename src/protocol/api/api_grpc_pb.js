@@ -18,17 +18,6 @@ function deserialize_protocol_Account(buffer_arg) {
   return core_Tron_pb.Account.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
-function serialize_protocol_AccountList(arg) {
-  if (!(arg instanceof api_api_pb.AccountList)) {
-    throw new Error('Expected argument of type protocol.AccountList');
-  }
-  return new Buffer(arg.serializeBinary());
-}
-
-function deserialize_protocol_AccountList(buffer_arg) {
-  return api_api_pb.AccountList.deserializeBinary(new Uint8Array(buffer_arg));
-}
-
 function serialize_protocol_AccountUpdateContract(arg) {
   if (!(arg instanceof core_Contract_pb.AccountUpdateContract)) {
     throw new Error('Expected argument of type protocol.AccountUpdateContract');
@@ -361,17 +350,6 @@ var WalletService = exports.WalletService = {
     responseSerialize: serialize_protocol_Return,
     responseDeserialize: deserialize_protocol_Return,
   },
-  listAccounts: {
-    path: '/protocol.Wallet/ListAccounts',
-    requestStream: false,
-    responseStream: false,
-    requestType: api_api_pb.EmptyMessage,
-    responseType: api_api_pb.AccountList,
-    requestSerialize: serialize_protocol_EmptyMessage,
-    requestDeserialize: deserialize_protocol_EmptyMessage,
-    responseSerialize: serialize_protocol_AccountList,
-    responseDeserialize: deserialize_protocol_AccountList,
-  },
   updateAccount: {
     path: '/protocol.Wallet/UpdateAccount',
     requestStream: false,
@@ -404,17 +382,6 @@ var WalletService = exports.WalletService = {
     requestDeserialize: deserialize_protocol_AssetIssueContract,
     responseSerialize: serialize_protocol_Transaction,
     responseDeserialize: deserialize_protocol_Transaction,
-  },
-  listWitnesses: {
-    path: '/protocol.Wallet/ListWitnesses',
-    requestStream: false,
-    responseStream: false,
-    requestType: api_api_pb.EmptyMessage,
-    responseType: api_api_pb.WitnessList,
-    requestSerialize: serialize_protocol_EmptyMessage,
-    requestDeserialize: deserialize_protocol_EmptyMessage,
-    responseSerialize: serialize_protocol_WitnessList,
-    responseDeserialize: deserialize_protocol_WitnessList,
   },
   updateWitness: {
     path: '/protocol.Wallet/UpdateWitness',
@@ -515,17 +482,6 @@ var WalletService = exports.WalletService = {
     responseSerialize: serialize_protocol_NodeList,
     responseDeserialize: deserialize_protocol_NodeList,
   },
-  getAssetIssueList: {
-    path: '/protocol.Wallet/GetAssetIssueList',
-    requestStream: false,
-    responseStream: false,
-    requestType: api_api_pb.EmptyMessage,
-    responseType: api_api_pb.AssetIssueList,
-    requestSerialize: serialize_protocol_EmptyMessage,
-    requestDeserialize: deserialize_protocol_EmptyMessage,
-    responseSerialize: serialize_protocol_AssetIssueList,
-    responseDeserialize: deserialize_protocol_AssetIssueList,
-  },
   getAssetIssueByAccount: {
     path: '/protocol.Wallet/GetAssetIssueByAccount',
     requestStream: false,
@@ -569,17 +525,6 @@ var WalletService = exports.WalletService = {
     requestDeserialize: deserialize_protocol_NumberMessage,
     responseSerialize: serialize_protocol_Block,
     responseDeserialize: deserialize_protocol_Block,
-  },
-  totalTransaction: {
-    path: '/protocol.Wallet/TotalTransaction',
-    requestStream: false,
-    responseStream: false,
-    requestType: api_api_pb.EmptyMessage,
-    responseType: api_api_pb.NumberMessage,
-    requestSerialize: serialize_protocol_EmptyMessage,
-    requestDeserialize: deserialize_protocol_EmptyMessage,
-    responseSerialize: serialize_protocol_NumberMessage,
-    responseDeserialize: deserialize_protocol_NumberMessage,
   },
   getBlockById: {
     path: '/protocol.Wallet/GetBlockById',
@@ -625,6 +570,50 @@ var WalletService = exports.WalletService = {
     responseSerialize: serialize_protocol_Transaction,
     responseDeserialize: deserialize_protocol_Transaction,
   },
+  listWitnesses: {
+    path: '/protocol.Wallet/ListWitnesses',
+    requestStream: false,
+    responseStream: false,
+    requestType: api_api_pb.EmptyMessage,
+    responseType: api_api_pb.WitnessList,
+    requestSerialize: serialize_protocol_EmptyMessage,
+    requestDeserialize: deserialize_protocol_EmptyMessage,
+    responseSerialize: serialize_protocol_WitnessList,
+    responseDeserialize: deserialize_protocol_WitnessList,
+  },
+  getAssetIssueList: {
+    path: '/protocol.Wallet/GetAssetIssueList',
+    requestStream: false,
+    responseStream: false,
+    requestType: api_api_pb.EmptyMessage,
+    responseType: api_api_pb.AssetIssueList,
+    requestSerialize: serialize_protocol_EmptyMessage,
+    requestDeserialize: deserialize_protocol_EmptyMessage,
+    responseSerialize: serialize_protocol_AssetIssueList,
+    responseDeserialize: deserialize_protocol_AssetIssueList,
+  },
+  totalTransaction: {
+    path: '/protocol.Wallet/TotalTransaction',
+    requestStream: false,
+    responseStream: false,
+    requestType: api_api_pb.EmptyMessage,
+    responseType: api_api_pb.NumberMessage,
+    requestSerialize: serialize_protocol_EmptyMessage,
+    requestDeserialize: deserialize_protocol_EmptyMessage,
+    responseSerialize: serialize_protocol_NumberMessage,
+    responseDeserialize: deserialize_protocol_NumberMessage,
+  },
+  getNextMaintenanceTime: {
+    path: '/protocol.Wallet/GetNextMaintenanceTime',
+    requestStream: false,
+    responseStream: false,
+    requestType: api_api_pb.EmptyMessage,
+    responseType: api_api_pb.NumberMessage,
+    requestSerialize: serialize_protocol_EmptyMessage,
+    requestDeserialize: deserialize_protocol_EmptyMessage,
+    responseSerialize: serialize_protocol_NumberMessage,
+    responseDeserialize: deserialize_protocol_NumberMessage,
+  },
 };
 
 exports.WalletClient = grpc.makeGenericClientConstructor(WalletService);
@@ -639,17 +628,6 @@ var WalletSolidityService = exports.WalletSolidityService = {
     requestDeserialize: deserialize_protocol_Account,
     responseSerialize: serialize_protocol_Account,
     responseDeserialize: deserialize_protocol_Account,
-  },
-  listAccounts: {
-    path: '/protocol.WalletSolidity/ListAccounts',
-    requestStream: false,
-    responseStream: false,
-    requestType: api_api_pb.EmptyMessage,
-    responseType: api_api_pb.AccountList,
-    requestSerialize: serialize_protocol_EmptyMessage,
-    requestDeserialize: deserialize_protocol_EmptyMessage,
-    responseSerialize: serialize_protocol_AccountList,
-    responseDeserialize: deserialize_protocol_AccountList,
   },
   listWitnesses: {
     path: '/protocol.WalletSolidity/ListWitnesses',
