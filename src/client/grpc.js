@@ -125,7 +125,7 @@ class GrpcClient {
     lastBlock.transactionsList = lastBlockRaw.getTransactionsList().map(tx => deserializeTransaction(tx)[0]);
     lastBlock.transactionsCount = lastBlock.transactionsList.length;
     lastBlock.totalTrx = lastBlock.transactionsList.reduce((t, n) => t + ((n && n.amount) ? n.amount : 0), 0);
-    lastBlock.size = blockRaw.serializeBinary().length;
+    lastBlock.size = rawData.serializeBinary().length;
     lastBlock.time = rawData.getTimestamp();
     lastBlock.witnessAddress = getBase58CheckAddress(Array.from(rawData.getWitnessAddress())),
     lastBlock.number = rawData.getNumber();
