@@ -2254,6 +2254,7 @@ proto.protocol.AssetIssueContract.toObject = function(includeInstance, msg) {
   var f, obj = {
     ownerAddress: msg.getOwnerAddress_asB64(),
     name: msg.getName_asB64(),
+    abbr: msg.getAbbr_asB64(),
     totalSupply: jspb.Message.getFieldWithDefault(msg, 4, 0),
     frozenSupplyList: jspb.Message.toObjectList(msg.getFrozenSupplyList(),
     proto.protocol.AssetIssueContract.FrozenSupply.toObject, includeInstance),
@@ -2307,6 +2308,10 @@ proto.protocol.AssetIssueContract.deserializeBinaryFromReader = function(msg, re
     case 2:
       var value = /** @type {!Uint8Array} */ (reader.readBytes());
       msg.setName(value);
+      break;
+    case 3:
+      var value = /** @type {!Uint8Array} */ (reader.readBytes());
+      msg.setAbbr(value);
       break;
     case 4:
       var value = /** @type {number} */ (reader.readInt64());
@@ -2385,6 +2390,13 @@ proto.protocol.AssetIssueContract.serializeBinaryToWriter = function(message, wr
   if (f.length > 0) {
     writer.writeBytes(
       2,
+      f
+    );
+  }
+  f = message.getAbbr_asU8();
+  if (f.length > 0) {
+    writer.writeBytes(
+      3,
       f
     );
   }
@@ -2699,6 +2711,45 @@ proto.protocol.AssetIssueContract.prototype.getName_asU8 = function() {
 /** @param {!(string|Uint8Array)} value */
 proto.protocol.AssetIssueContract.prototype.setName = function(value) {
   jspb.Message.setProto3BytesField(this, 2, value);
+};
+
+
+/**
+ * optional bytes abbr = 3;
+ * @return {!(string|Uint8Array)}
+ */
+proto.protocol.AssetIssueContract.prototype.getAbbr = function() {
+  return /** @type {!(string|Uint8Array)} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+};
+
+
+/**
+ * optional bytes abbr = 3;
+ * This is a type-conversion wrapper around `getAbbr()`
+ * @return {string}
+ */
+proto.protocol.AssetIssueContract.prototype.getAbbr_asB64 = function() {
+  return /** @type {string} */ (jspb.Message.bytesAsB64(
+      this.getAbbr()));
+};
+
+
+/**
+ * optional bytes abbr = 3;
+ * Note that Uint8Array is not supported on all browsers.
+ * @see http://caniuse.com/Uint8Array
+ * This is a type-conversion wrapper around `getAbbr()`
+ * @return {!Uint8Array}
+ */
+proto.protocol.AssetIssueContract.prototype.getAbbr_asU8 = function() {
+  return /** @type {!Uint8Array} */ (jspb.Message.bytesAsU8(
+      this.getAbbr()));
+};
+
+
+/** @param {!(string|Uint8Array)} value */
+proto.protocol.AssetIssueContract.prototype.setAbbr = function(value) {
+  jspb.Message.setProto3BytesField(this, 3, value);
 };
 
 

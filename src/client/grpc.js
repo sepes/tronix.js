@@ -1,4 +1,4 @@
-const { EmptyMessage, NumberMessage } = require('../protocol/api/api_pb');
+const { EmptyMessage, NumberMessage, BytesMessage } = require('../protocol/api/api_pb');
 const {
   getBase58CheckAddress, passwordToAddress, decode58Check,
 } = require('../utils/crypto');
@@ -7,6 +7,7 @@ const { deserializeTransaction } = require('../protocol/serializer');
 const { Account } = require('../protocol/core/Tron_pb');
 const { WalletClient } = require('../protocol/api/api_grpc_pb');
 const caller = require('grpc-caller');
+const { stringToBytes } = require('../lib/code');
 
 class GrpcClient {
   constructor(options) {
@@ -44,7 +45,7 @@ class GrpcClient {
       .then(x => x.getNodesList());
   }
 
-  async getAssets() {
+  async getAssetIssueList() {
     const assetsListRaw = await this.api.getAssetIssueList(new EmptyMessage())
       .then(x => x.getAssetissueList());
     const assetsList = assetsListRaw.map(ai => ({
@@ -58,8 +59,30 @@ class GrpcClient {
       totalSupply: ai.getTotalSupply(),
       trxNum: ai.getTrxNum() / 1000,
       num: ai.getNum(),
+      abbr: ai.getAbbr(),
     }));
     return assetsList;
+  }
+
+  async getAssetIssueByName(assetName) {
+    const assetByte = new BytesMessage();
+    assetByte.setValue(new Uint8Array(stringToBytes(assetName)));
+
+    const assetIssue = await this.api.getAssetIssueByName(assetByte);
+    return {
+      ownerAddress: getBase58CheckAddress(Array.from(assetIssue.getOwnerAddress())),
+      url: bytesToString(assetIssue.getUrl()),
+      name: bytesToString(assetIssue.getName()),
+      description: bytesToString(assetIssue.getDescription()),
+      startTime: assetIssue.getStartTime(),
+      endTime: assetIssue.getEndTime(),
+      voteScore: assetIssue.getVoteScore(),
+      totalSupply: assetIssue.getTotalSupply(),
+      trxNum: assetIssue.getTrxNum() / 1000,
+      num: assetIssue.getNum(),
+      frozenSupplyList: assetIssue.getFrozenSupplyList(),
+      abbr: assetIssue.getAbbr(),
+    };
   }
 
   /**
