@@ -116,7 +116,7 @@ class SolidityGrpcClient {
     const blockRaw = await this.api.getBlockByNum(message);
     const block = blockRaw.toObject();
     const rawData = blockRaw.getBlockHeader().getRawData();
-    block.transactionsList = blockRaw.getTransactionsList().map(tx => deserializeTransaction(tx)[0]);
+    block.transactionsList = blockRaw.getTransactionsList().map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
     block.transactionsCount = block.transactionsList.length;
     block.totalTrx = block.transactionsList.reduce((t, n) => t + ((n && n.amount) ? n.amount : 0), 0);
     block.size = blockRaw.serializeBinary().length;
@@ -137,7 +137,7 @@ class SolidityGrpcClient {
     const lastBlockRaw = await this.api.getNowBlock(new EmptyMessage());
     const lastBlock = lastBlockRaw.toObject();
     const rawData = lastBlockRaw.getBlockHeader().getRawData();
-    lastBlock.transactionsList = lastBlockRaw.getTransactionsList().map(tx => deserializeTransaction(tx)[0]);
+    lastBlock.transactionsList = lastBlockRaw.getTransactionsList().map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
     lastBlock.transactionsCount = lastBlock.transactionsList.length;
     lastBlock.totalTrx = lastBlock.transactionsList.reduce((t, n) => t + ((n && n.amount) ? n.amount : 0), 0);
     lastBlock.size = rawData.serializeBinary().length;
@@ -160,7 +160,7 @@ class SolidityGrpcClient {
     const accountArg = new Account();
     accountArg.setAddress(new Uint8Array(decode58Check(address)));
     const accountRaw = await this.api.getTransactionsToThis(accountArg);
-    const account = accountRaw.getTransactionList().map(tx => deserializeTransaction(tx)[0]);
+    const account = accountRaw.getTransactionList().map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
     return account.filter(x => !!x);
   }
 
@@ -168,7 +168,7 @@ class SolidityGrpcClient {
     const accountArg = new Account();
     accountArg.setAddress(new Uint8Array(decode58Check(address)));
     const accountRaw = await this.api.getTransactionsFromThis(accountArg);
-    const account = accountRaw.getTransactionList().map(tx => deserializeTransaction(tx)[0]);
+    const account = accountRaw.getTransactionList().map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
     return account.filter(x => !!x);
   }
 
@@ -177,7 +177,7 @@ class SolidityGrpcClient {
     timeArg.setBegininmilliseconds(init);
     timeArg.setEndinmilliseconds(end);
     const txBwTime = await this.api.getTransactionsByTimestamp(timeArg);
-    const txs = txBwTime.getTransactionList().map(tx => deserializeTransaction(tx)[0]);
+    const txs = txBwTime.getTransactionList().map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
     return txs.filter(x => !!x);
   }
 

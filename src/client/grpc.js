@@ -124,7 +124,7 @@ class GrpcClient {
     const blockRaw = await this.api.getBlockByNum(message);
     const block = blockRaw.toObject();
     const rawData = blockRaw.getBlockHeader().getRawData();
-    block.transactionsList = blockRaw.getTransactionsList().map(tx => deserializeTransaction(tx)[0]);
+    block.transactionsList = blockRaw.getTransactionsList().map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
     block.transactionsCount = block.transactionsList.length;
     block.totalTrx = block.transactionsList.reduce((t, n) => t + ((n && n.amount) ? n.amount : 0), 0);
     block.size = blockRaw.serializeBinary().length;
@@ -145,7 +145,7 @@ class GrpcClient {
     const lastBlockRaw = await this.api.getNowBlock(new EmptyMessage());
     const lastBlock = lastBlockRaw.toObject();
     const rawData = lastBlockRaw.getBlockHeader().getRawData();
-    lastBlock.transactionsList = lastBlockRaw.getTransactionsList().map(tx => deserializeTransaction(tx)[0]);
+    lastBlock.transactionsList = lastBlockRaw.getTransactionsList().map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
     lastBlock.transactionsCount = lastBlock.transactionsList.length;
     lastBlock.totalTrx = lastBlock.transactionsList.reduce((t, n) => t + ((n && n.amount) ? n.amount : 0), 0);
     lastBlock.size = rawData.serializeBinary().length;
