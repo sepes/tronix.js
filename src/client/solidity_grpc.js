@@ -1,23 +1,25 @@
-const { EmptyMessage, NumberMessage, BytesMessage } = require('../protocol/api/api_pb');
+const {
+  EmptyMessage, NumberMessage, BytesMessage, TimeMessage,
+} = require('../protocol/api/api_pb');
 const {
   getBase58CheckAddress, passwordToAddress, decode58Check,
 } = require('../utils/crypto');
 const { byteArray2hexStr, bytesToString } = require('../utils/bytes');
 const { deserializeTransaction } = require('../protocol/serializer');
 const { Account } = require('../protocol/core/Tron_pb');
-const { WalletClient } = require('../protocol/api/api_grpc_pb');
+const { WalletSolidityClient } = require('../protocol/api/api_grpc_pb');
 const caller = require('grpc-caller');
-const { stringToBytes } = require('../lib/code');
+const { stringToBytes, hexStr2byteArray } = require('../lib/code');
 
-class GrpcClient {
+class SolidityGrpcClient {
   constructor(options) {
     this.hostname = options.hostname;
-    this.port = options.port || 50051;
+    this.port = options.port;
 
     /**
      * @type {WalletClient}
      */
-    this.api = caller(`${this.hostname}:${this.port}`, WalletClient);
+    this.api = caller(`${this.hostname}:${this.port}`, WalletSolidityClient);
   }
 
   /**
@@ -33,16 +35,6 @@ class GrpcClient {
       witness.address = getBase58CheckAddress(Array.from(w.getAddress()));
       return witness;
     });
-  }
-
-  /**
-   * Retrieve all connected nodes
-   *
-   * @returns {Promise<*>}
-   */
-  async getNodes() {
-    return await this.api.listNodes(new EmptyMessage())
-      .then(x => x.getNodesList());
   }
 
   async getAssetIssueList() {
@@ -157,15 +149,42 @@ class GrpcClient {
     return lastBlock;
   }
 
+  async getTransactionById(txHash) {
+    const txByte = new BytesMessage();
+    txByte.setValue(new Uint8Array(hexStr2byteArray(txHash)));
+    const transaction = await this.api.getTransactionById(txByte);
+    return transaction.toObject();
+  }
+
+  async getTransactionsToThis(address) {
+    const accountArg = new Account();
+    accountArg.setAddress(new Uint8Array(decode58Check(address)));
+    const accountRaw = await this.api.getTransactionsToThis(accountArg);
+    const account = accountRaw.getTransactionList().map(tx => deserializeTransaction(tx)[0]);
+    return account.filter(x => !!x);
+  }
+
+  async getTransactionsFromThis(address) {
+    const accountArg = new Account();
+    accountArg.setAddress(new Uint8Array(decode58Check(address)));
+    const accountRaw = await this.api.getTransactionsFromThis(accountArg);
+    const account = accountRaw.getTransactionList().map(tx => deserializeTransaction(tx)[0]);
+    return account.filter(x => !!x);
+  }
+
+  async getTransactionsByTimestamp(init, end) {
+    const timeArg = new TimeMessage();
+    timeArg.setBegininmilliseconds(init);
+    timeArg.setEndinmilliseconds(end);
+    const txBwTime = await this.api.getTransactionsByTimestamp(timeArg);
+    const txs = txBwTime.getTransactionList().map(tx => deserializeTransaction(tx)[0]);
+    return txs.filter(x => !!x);
+  }
+
   async getTotalTransaction() {
     const totalTransactions = await this.api.totalTransaction(new EmptyMessage());
     return totalTransactions.toObject().num;
   }
-
-  async getNextMaintenanceTime() {
-    const nextMaintenanceTime = await this.api.getNextMaintenanceTime(new EmptyMessage());
-    return nextMaintenanceTime.toObject();
-  }
 }
 
-module.exports = GrpcClient;
+module.exports = SolidityGrpcClient;

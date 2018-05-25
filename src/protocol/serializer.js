@@ -36,8 +36,9 @@ function deserializeTransaction(tx) {
         const toHex = getBase58CheckAddress(Array.from(to));
 
         const amount = obje.getAmount() / 1000000;
-
-        const hash = byteArray2hexStr(SHA256(tx.serializeBinary()));
+        
+        const rawData = tx.getRawData();
+        const hash = byteArray2hexStr(SHA256(rawData.serializeBinary()));
 
         transactions.push({
           hash,
@@ -45,8 +46,8 @@ function deserializeTransaction(tx) {
           to: toHex,
           amount,
           time: tx.getRawData().getTimestamp(),
-          data: tx.data,
-          scripts: tx.scripts,
+          data: rawData.getData(),
+          scripts: rawData.getScripts(),
         });
       }
         break;
