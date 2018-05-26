@@ -23,7 +23,8 @@ function deserializeTransaction(tx) {
         transactions.push({});
       }
         break;
-
+        
+      default:
       case contractType.TRANSFERCONTRACT: {
         // let contractType = contractType .TRANSFERCONTRACT;
 
@@ -50,8 +51,6 @@ function deserializeTransaction(tx) {
           scripts: rawData.getScripts(),
         });
       }
-        break;
-      default:
         break;
     }
   });
