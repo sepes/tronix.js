@@ -1,10 +1,10 @@
 // GENERATED CODE -- DO NOT EDIT!
 
-'use strict';
-var grpc = require('grpc');
-var api_api_pb = require('../api/api_pb.js');
-var core_Tron_pb = require('../core/Tron_pb.js');
-var core_Contract_pb = require('../core/Contract_pb.js');
+
+const grpc = require('grpc');
+const api_api_pb = require('../api/api_pb.js');
+const core_Tron_pb = require('../core/Tron_pb.js');
+const core_Contract_pb = require('../core/Contract_pb.js');
 // var google_api_annotations_pb = require('../google/api/annotations_pb.js');
 
 function serialize_protocol_Account(arg) {
@@ -316,7 +316,7 @@ function deserialize_protocol_WitnessUpdateContract(buffer_arg) {
 }
 
 
-var WalletService = exports.WalletService = {
+const WalletService = exports.WalletService = {
   getAccount: {
     path: '/protocol.Wallet/GetAccount',
     requestStream: false,
@@ -617,7 +617,7 @@ var WalletService = exports.WalletService = {
 };
 
 exports.WalletClient = grpc.makeGenericClientConstructor(WalletService);
-var WalletSolidityService = exports.WalletSolidityService = {
+const WalletSolidityService = exports.WalletSolidityService = {
   getAccount: {
     path: '/protocol.WalletSolidity/GetAccount',
     requestStream: false,
@@ -766,7 +766,7 @@ var WalletSolidityService = exports.WalletSolidityService = {
 
 exports.WalletSolidityClient = grpc.makeGenericClientConstructor(WalletSolidityService);
 // the api of tron's db
-var DatabaseService = exports.DatabaseService = {
+const DatabaseService = exports.DatabaseService = {
   // for tapos
   getBlockReference: {
     path: '/protocol.Database/getBlockReference',
@@ -816,7 +816,7 @@ var DatabaseService = exports.DatabaseService = {
 
 exports.DatabaseClient = grpc.makeGenericClientConstructor(DatabaseService);
 // the api of tron's network such as node list.
-var NetworkService = exports.NetworkService = {
+const NetworkService = exports.NetworkService = {
 };
 
 exports.NetworkClient = grpc.makeGenericClientConstructor(NetworkService);
