@@ -1,5 +1,5 @@
 const {
-  EmptyMessage, NumberMessage, BytesMessage, TimeMessage,
+  EmptyMessage, NumberMessage, BytesMessage, TimeMessage, AccountPaginated,
 } = require('../protocol/api/api_pb');
 const {
   getBase58CheckAddress, passwordToAddress, decode58Check,
@@ -159,7 +159,11 @@ class SolidityGrpcClient {
   async getTransactionsToThis(address) {
     const accountArg = new Account();
     accountArg.setAddress(new Uint8Array(decode58Check(address)));
-    const accountRaw = await this.api.getTransactionsToThis(accountArg);
+    const accountPag = new AccountPaginated();
+    accountPag.setAccount(accountArg);
+    accountPag.setLimit(1000);
+    accountPag.setOffset(0);
+    const accountRaw = await this.api.getTransactionsToThis(accountPag);
     const account = accountRaw.getTransactionList().map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
     return account.filter(x => !!x);
   }
@@ -167,7 +171,11 @@ class SolidityGrpcClient {
   async getTransactionsFromThis(address) {
     const accountArg = new Account();
     accountArg.setAddress(new Uint8Array(decode58Check(address)));
-    const accountRaw = await this.api.getTransactionsFromThis(accountArg);
+    const accountPag = new AccountPaginated();
+    accountPag.setAccount(accountArg);
+    accountPag.setLimit(1000);
+    accountPag.setOffset(0);
+    const accountRaw = await this.api.getTransactionsFromThis(accountPag);
     const account = accountRaw.getTransactionList().map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
     return account.filter(x => !!x);
   }

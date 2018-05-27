@@ -1,10 +1,10 @@
 // GENERATED CODE -- DO NOT EDIT!
 
-
-const grpc = require('grpc');
-const api_api_pb = require('../api/api_pb.js');
-const core_Tron_pb = require('../core/Tron_pb.js');
-const core_Contract_pb = require('../core/Contract_pb.js');
+'use strict';
+var grpc = require('grpc');
+var api_api_pb = require('../api/api_pb.js');
+var core_Tron_pb = require('../core/Tron_pb.js');
+var core_Contract_pb = require('../core/Contract_pb.js');
 // var google_api_annotations_pb = require('../google/api/annotations_pb.js');
 
 function serialize_protocol_Account(arg) {
@@ -16,6 +16,28 @@ function serialize_protocol_Account(arg) {
 
 function deserialize_protocol_Account(buffer_arg) {
   return core_Tron_pb.Account.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_protocol_AccountNetMessage(arg) {
+  if (!(arg instanceof api_api_pb.AccountNetMessage)) {
+    throw new Error('Expected argument of type protocol.AccountNetMessage');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_protocol_AccountNetMessage(buffer_arg) {
+  return api_api_pb.AccountNetMessage.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_protocol_AccountPaginated(arg) {
+  if (!(arg instanceof api_api_pb.AccountPaginated)) {
+    throw new Error('Expected argument of type protocol.AccountPaginated');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_protocol_AccountPaginated(buffer_arg) {
+  return api_api_pb.AccountPaginated.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 function serialize_protocol_AccountUpdateContract(arg) {
@@ -194,6 +216,17 @@ function deserialize_protocol_TimeMessage(buffer_arg) {
   return api_api_pb.TimeMessage.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_protocol_TimePaginatedMessage(arg) {
+  if (!(arg instanceof api_api_pb.TimePaginatedMessage)) {
+    throw new Error('Expected argument of type protocol.TimePaginatedMessage');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_protocol_TimePaginatedMessage(buffer_arg) {
+  return api_api_pb.TimePaginatedMessage.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_protocol_Transaction(arg) {
   if (!(arg instanceof core_Tron_pb.Transaction)) {
     throw new Error('Expected argument of type protocol.Transaction');
@@ -260,6 +293,17 @@ function deserialize_protocol_UnfreezeBalanceContract(buffer_arg) {
   return core_Contract_pb.UnfreezeBalanceContract.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_protocol_UpdateAssetContract(arg) {
+  if (!(arg instanceof core_Contract_pb.UpdateAssetContract)) {
+    throw new Error('Expected argument of type protocol.UpdateAssetContract');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_protocol_UpdateAssetContract(buffer_arg) {
+  return core_Contract_pb.UpdateAssetContract.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_protocol_VoteWitnessContract(arg) {
   if (!(arg instanceof core_Contract_pb.VoteWitnessContract)) {
     throw new Error('Expected argument of type protocol.VoteWitnessContract');
@@ -316,7 +360,7 @@ function deserialize_protocol_WitnessUpdateContract(buffer_arg) {
 }
 
 
-const WalletService = exports.WalletService = {
+var WalletService = exports.WalletService = {
   getAccount: {
     path: '/protocol.Wallet/GetAccount',
     requestStream: false,
@@ -471,6 +515,17 @@ const WalletService = exports.WalletService = {
     responseSerialize: serialize_protocol_Transaction,
     responseDeserialize: deserialize_protocol_Transaction,
   },
+  updateAsset: {
+    path: '/protocol.Wallet/UpdateAsset',
+    requestStream: false,
+    responseStream: false,
+    requestType: core_Contract_pb.UpdateAssetContract,
+    responseType: core_Tron_pb.Transaction,
+    requestSerialize: serialize_protocol_UpdateAssetContract,
+    requestDeserialize: deserialize_protocol_UpdateAssetContract,
+    responseSerialize: serialize_protocol_Transaction,
+    responseDeserialize: deserialize_protocol_Transaction,
+  },
   listNodes: {
     path: '/protocol.Wallet/ListNodes',
     requestStream: false,
@@ -492,6 +547,17 @@ const WalletService = exports.WalletService = {
     requestDeserialize: deserialize_protocol_Account,
     responseSerialize: serialize_protocol_AssetIssueList,
     responseDeserialize: deserialize_protocol_AssetIssueList,
+  },
+  getAccountNet: {
+    path: '/protocol.Wallet/GetAccountNet',
+    requestStream: false,
+    responseStream: false,
+    requestType: core_Tron_pb.Account,
+    responseType: api_api_pb.AccountNetMessage,
+    requestSerialize: serialize_protocol_Account,
+    requestDeserialize: deserialize_protocol_Account,
+    responseSerialize: serialize_protocol_AccountNetMessage,
+    responseDeserialize: deserialize_protocol_AccountNetMessage,
   },
   getAssetIssueByName: {
     path: '/protocol.Wallet/GetAssetIssueByName',
@@ -617,7 +683,7 @@ const WalletService = exports.WalletService = {
 };
 
 exports.WalletClient = grpc.makeGenericClientConstructor(WalletService);
-const WalletSolidityService = exports.WalletSolidityService = {
+var WalletSolidityService = exports.WalletSolidityService = {
   getAccount: {
     path: '/protocol.WalletSolidity/GetAccount',
     requestStream: false,
@@ -733,21 +799,32 @@ const WalletSolidityService = exports.WalletSolidityService = {
     path: '/protocol.WalletSolidity/GetTransactionsByTimestamp',
     requestStream: false,
     responseStream: false,
-    requestType: api_api_pb.TimeMessage,
+    requestType: api_api_pb.TimePaginatedMessage,
     responseType: api_api_pb.TransactionList,
-    requestSerialize: serialize_protocol_TimeMessage,
-    requestDeserialize: deserialize_protocol_TimeMessage,
+    requestSerialize: serialize_protocol_TimePaginatedMessage,
+    requestDeserialize: deserialize_protocol_TimePaginatedMessage,
     responseSerialize: serialize_protocol_TransactionList,
     responseDeserialize: deserialize_protocol_TransactionList,
+  },
+  getTransactionsByTimestampCount: {
+    path: '/protocol.WalletSolidity/GetTransactionsByTimestampCount',
+    requestStream: false,
+    responseStream: false,
+    requestType: api_api_pb.TimeMessage,
+    responseType: api_api_pb.NumberMessage,
+    requestSerialize: serialize_protocol_TimeMessage,
+    requestDeserialize: deserialize_protocol_TimeMessage,
+    responseSerialize: serialize_protocol_NumberMessage,
+    responseDeserialize: deserialize_protocol_NumberMessage,
   },
   getTransactionsFromThis: {
     path: '/protocol.WalletSolidity/GetTransactionsFromThis',
     requestStream: false,
     responseStream: false,
-    requestType: core_Tron_pb.Account,
+    requestType: api_api_pb.AccountPaginated,
     responseType: api_api_pb.TransactionList,
-    requestSerialize: serialize_protocol_Account,
-    requestDeserialize: deserialize_protocol_Account,
+    requestSerialize: serialize_protocol_AccountPaginated,
+    requestDeserialize: deserialize_protocol_AccountPaginated,
     responseSerialize: serialize_protocol_TransactionList,
     responseDeserialize: deserialize_protocol_TransactionList,
   },
@@ -755,18 +832,40 @@ const WalletSolidityService = exports.WalletSolidityService = {
     path: '/protocol.WalletSolidity/GetTransactionsToThis',
     requestStream: false,
     responseStream: false,
-    requestType: core_Tron_pb.Account,
+    requestType: api_api_pb.AccountPaginated,
     responseType: api_api_pb.TransactionList,
-    requestSerialize: serialize_protocol_Account,
-    requestDeserialize: deserialize_protocol_Account,
+    requestSerialize: serialize_protocol_AccountPaginated,
+    requestDeserialize: deserialize_protocol_AccountPaginated,
     responseSerialize: serialize_protocol_TransactionList,
     responseDeserialize: deserialize_protocol_TransactionList,
+  },
+  getTransactionsFromThisCount: {
+    path: '/protocol.WalletSolidity/GetTransactionsFromThisCount',
+    requestStream: false,
+    responseStream: false,
+    requestType: core_Tron_pb.Account,
+    responseType: api_api_pb.NumberMessage,
+    requestSerialize: serialize_protocol_Account,
+    requestDeserialize: deserialize_protocol_Account,
+    responseSerialize: serialize_protocol_NumberMessage,
+    responseDeserialize: deserialize_protocol_NumberMessage,
+  },
+  getTransactionsToThisCount: {
+    path: '/protocol.WalletSolidity/GetTransactionsToThisCount',
+    requestStream: false,
+    responseStream: false,
+    requestType: core_Tron_pb.Account,
+    responseType: api_api_pb.NumberMessage,
+    requestSerialize: serialize_protocol_Account,
+    requestDeserialize: deserialize_protocol_Account,
+    responseSerialize: serialize_protocol_NumberMessage,
+    responseDeserialize: deserialize_protocol_NumberMessage,
   },
 };
 
 exports.WalletSolidityClient = grpc.makeGenericClientConstructor(WalletSolidityService);
 // the api of tron's db
-const DatabaseService = exports.DatabaseService = {
+var DatabaseService = exports.DatabaseService = {
   // for tapos
   getBlockReference: {
     path: '/protocol.Database/getBlockReference',
@@ -816,7 +915,7 @@ const DatabaseService = exports.DatabaseService = {
 
 exports.DatabaseClient = grpc.makeGenericClientConstructor(DatabaseService);
 // the api of tron's network such as node list.
-const NetworkService = exports.NetworkService = {
+var NetworkService = exports.NetworkService = {
 };
 
 exports.NetworkClient = grpc.makeGenericClientConstructor(NetworkService);
