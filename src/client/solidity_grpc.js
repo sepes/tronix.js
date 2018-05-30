@@ -51,7 +51,7 @@ class SolidityGrpcClient {
       totalSupply: ai.getTotalSupply(),
       trxNum: ai.getTrxNum() / 1000,
       num: ai.getNum(),
-      abbr: ai.getAbbr(),
+      abbr: bytesToString(ai.getAbbr()),
     }));
     return assetsList;
   }
@@ -73,7 +73,7 @@ class SolidityGrpcClient {
       trxNum: assetIssue.getTrxNum() / 1000,
       num: assetIssue.getNum(),
       frozenSupplyList: assetIssue.getFrozenSupplyList(),
-      abbr: assetIssue.getAbbr(),
+      abbr: bytesToString(assetIssue.getAbbr()),
     };
   }
 
