@@ -18,6 +18,17 @@ function deserialize_protocol_Account(buffer_arg) {
   return core_Tron_pb.Account.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_protocol_AccountCreateContract(arg) {
+  if (!(arg instanceof core_Contract_pb.AccountCreateContract)) {
+    throw new Error('Expected argument of type protocol.AccountCreateContract');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_protocol_AccountCreateContract(buffer_arg) {
+  return core_Contract_pb.AccountCreateContract.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_protocol_AccountNetMessage(arg) {
   if (!(arg instanceof api_api_pb.AccountNetMessage)) {
     throw new Error('Expected argument of type protocol.AccountNetMessage');
@@ -438,6 +449,17 @@ var WalletService = exports.WalletService = {
     responseSerialize: serialize_protocol_Transaction,
     responseDeserialize: deserialize_protocol_Transaction,
   },
+  createAccount: {
+    path: '/protocol.Wallet/CreateAccount',
+    requestStream: false,
+    responseStream: false,
+    requestType: core_Contract_pb.AccountCreateContract,
+    responseType: core_Tron_pb.Transaction,
+    requestSerialize: serialize_protocol_AccountCreateContract,
+    requestDeserialize: deserialize_protocol_AccountCreateContract,
+    responseSerialize: serialize_protocol_Transaction,
+    responseDeserialize: deserialize_protocol_Transaction,
+  },
   createWitness: {
     path: '/protocol.Wallet/CreateWitness',
     requestStream: false,
@@ -795,8 +817,12 @@ var WalletSolidityService = exports.WalletSolidityService = {
     responseSerialize: serialize_protocol_Transaction,
     responseDeserialize: deserialize_protocol_Transaction,
   },
+};
+
+exports.WalletSolidityClient = grpc.makeGenericClientConstructor(WalletSolidityService);
+var WalletExtensionService = exports.WalletExtensionService = {
   getTransactionsByTimestamp: {
-    path: '/protocol.WalletSolidity/GetTransactionsByTimestamp',
+    path: '/protocol.WalletExtension/GetTransactionsByTimestamp',
     requestStream: false,
     responseStream: false,
     requestType: api_api_pb.TimePaginatedMessage,
@@ -807,7 +833,7 @@ var WalletSolidityService = exports.WalletSolidityService = {
     responseDeserialize: deserialize_protocol_TransactionList,
   },
   getTransactionsByTimestampCount: {
-    path: '/protocol.WalletSolidity/GetTransactionsByTimestampCount',
+    path: '/protocol.WalletExtension/GetTransactionsByTimestampCount',
     requestStream: false,
     responseStream: false,
     requestType: api_api_pb.TimeMessage,
@@ -818,7 +844,7 @@ var WalletSolidityService = exports.WalletSolidityService = {
     responseDeserialize: deserialize_protocol_NumberMessage,
   },
   getTransactionsFromThis: {
-    path: '/protocol.WalletSolidity/GetTransactionsFromThis',
+    path: '/protocol.WalletExtension/GetTransactionsFromThis',
     requestStream: false,
     responseStream: false,
     requestType: api_api_pb.AccountPaginated,
@@ -829,7 +855,7 @@ var WalletSolidityService = exports.WalletSolidityService = {
     responseDeserialize: deserialize_protocol_TransactionList,
   },
   getTransactionsToThis: {
-    path: '/protocol.WalletSolidity/GetTransactionsToThis',
+    path: '/protocol.WalletExtension/GetTransactionsToThis',
     requestStream: false,
     responseStream: false,
     requestType: api_api_pb.AccountPaginated,
@@ -840,7 +866,7 @@ var WalletSolidityService = exports.WalletSolidityService = {
     responseDeserialize: deserialize_protocol_TransactionList,
   },
   getTransactionsFromThisCount: {
-    path: '/protocol.WalletSolidity/GetTransactionsFromThisCount',
+    path: '/protocol.WalletExtension/GetTransactionsFromThisCount',
     requestStream: false,
     responseStream: false,
     requestType: core_Tron_pb.Account,
@@ -851,7 +877,7 @@ var WalletSolidityService = exports.WalletSolidityService = {
     responseDeserialize: deserialize_protocol_NumberMessage,
   },
   getTransactionsToThisCount: {
-    path: '/protocol.WalletSolidity/GetTransactionsToThisCount',
+    path: '/protocol.WalletExtension/GetTransactionsToThisCount',
     requestStream: false,
     responseStream: false,
     requestType: core_Tron_pb.Account,
@@ -863,7 +889,7 @@ var WalletSolidityService = exports.WalletSolidityService = {
   },
 };
 
-exports.WalletSolidityClient = grpc.makeGenericClientConstructor(WalletSolidityService);
+exports.WalletExtensionClient = grpc.makeGenericClientConstructor(WalletExtensionService);
 // the api of tron's db
 var DatabaseService = exports.DatabaseService = {
   // for tapos

@@ -3090,7 +3090,9 @@ proto.protocol.AccountNetMessage.toObject = function(includeInstance, msg) {
     netused: jspb.Message.getFieldWithDefault(msg, 3, 0),
     netlimit: jspb.Message.getFieldWithDefault(msg, 4, 0),
     assetnetusedMap: (f = msg.getAssetnetusedMap()) ? f.toObject(includeInstance, undefined) : [],
-    assetnetlimitMap: (f = msg.getAssetnetlimitMap()) ? f.toObject(includeInstance, undefined) : []
+    assetnetlimitMap: (f = msg.getAssetnetlimitMap()) ? f.toObject(includeInstance, undefined) : [],
+    totalnetlimit: jspb.Message.getFieldWithDefault(msg, 7, 0),
+    totalnetweight: jspb.Message.getFieldWithDefault(msg, 8, 0)
   };
 
   if (includeInstance) {
@@ -3154,6 +3156,14 @@ proto.protocol.AccountNetMessage.deserializeBinaryFromReader = function(msg, rea
       reader.readMessage(value, function(message, reader) {
         jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readInt64);
          });
+      break;
+    case 7:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setTotalnetlimit(value);
+      break;
+    case 8:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setTotalnetweight(value);
       break;
     default:
       reader.skipField();
@@ -3219,6 +3229,20 @@ proto.protocol.AccountNetMessage.serializeBinaryToWriter = function(message, wri
   f = message.getAssetnetlimitMap(true);
   if (f && f.getLength() > 0) {
     f.serializeBinary(6, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeInt64);
+  }
+  f = message.getTotalnetlimit();
+  if (f !== 0) {
+    writer.writeInt64(
+      7,
+      f
+    );
+  }
+  f = message.getTotalnetweight();
+  if (f !== 0) {
+    writer.writeInt64(
+      8,
+      f
+    );
   }
 };
 
@@ -3316,6 +3340,36 @@ proto.protocol.AccountNetMessage.prototype.getAssetnetlimitMap = function(opt_no
 
 proto.protocol.AccountNetMessage.prototype.clearAssetnetlimitMap = function() {
   this.getAssetnetlimitMap().clear();
+};
+
+
+/**
+ * optional int64 TotalNetLimit = 7;
+ * @return {number}
+ */
+proto.protocol.AccountNetMessage.prototype.getTotalnetlimit = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 7, 0));
+};
+
+
+/** @param {number} value */
+proto.protocol.AccountNetMessage.prototype.setTotalnetlimit = function(value) {
+  jspb.Message.setProto3IntField(this, 7, value);
+};
+
+
+/**
+ * optional int64 TotalNetWeight = 8;
+ * @return {number}
+ */
+proto.protocol.AccountNetMessage.prototype.getTotalnetweight = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 8, 0));
+};
+
+
+/** @param {number} value */
+proto.protocol.AccountNetMessage.prototype.setTotalnetweight = function(value) {
+  jspb.Message.setProto3IntField(this, 8, value);
 };
 
 

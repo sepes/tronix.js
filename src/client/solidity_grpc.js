@@ -7,7 +7,7 @@ const {
 const { byteArray2hexStr, bytesToString } = require('../utils/bytes');
 const { deserializeTransaction } = require('../protocol/serializer');
 const { Account } = require('../protocol/core/Tron_pb');
-const { WalletSolidityClient } = require('../protocol/api/api_grpc_pb');
+const { WalletSolidityClient, WalletExtensionClient } = require('../protocol/api/api_grpc_pb');
 const caller = require('grpc-caller');
 const { stringToBytes, hexStr2byteArray } = require('../lib/code');
 
@@ -20,6 +20,7 @@ class SolidityGrpcClient {
      * @type {WalletClient}
      */
     this.api = caller(`${this.hostname}:${this.port}`, WalletSolidityClient);
+    this.api_extension = caller(`${this.hostname}:${this.port}`, WalletExtensionClient);
   }
 
   /**
@@ -163,7 +164,7 @@ class SolidityGrpcClient {
     accountPag.setAccount(accountArg);
     accountPag.setLimit(1000);
     accountPag.setOffset(0);
-    const accountRaw = await this.api.getTransactionsToThis(accountPag);
+    const accountRaw = await this.api_extension.getTransactionsToThis(accountPag);
     const account = accountRaw.getTransactionList().map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
     return account.filter(x => !!x);
   }
@@ -175,7 +176,7 @@ class SolidityGrpcClient {
     accountPag.setAccount(accountArg);
     accountPag.setLimit(1000);
     accountPag.setOffset(0);
-    const accountRaw = await this.api.getTransactionsFromThis(accountPag);
+    const accountRaw = await this.api_extension.getTransactionsFromThis(accountPag);
     const account = accountRaw.getTransactionList().map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
     return account.filter(x => !!x);
   }

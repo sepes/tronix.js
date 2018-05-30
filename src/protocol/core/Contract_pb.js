@@ -77,9 +77,9 @@ proto.protocol.AccountCreateContract.prototype.toObject = function(opt_includeIn
  */
 proto.protocol.AccountCreateContract.toObject = function(includeInstance, msg) {
   var f, obj = {
-    type: jspb.Message.getFieldWithDefault(msg, 1, 0),
-    accountName: msg.getAccountName_asB64(),
-    ownerAddress: msg.getOwnerAddress_asB64()
+    ownerAddress: msg.getOwnerAddress_asB64(),
+    accountAddress: msg.getAccountAddress_asB64(),
+    type: jspb.Message.getFieldWithDefault(msg, 3, 0)
   };
 
   if (includeInstance) {
@@ -117,16 +117,16 @@ proto.protocol.AccountCreateContract.deserializeBinaryFromReader = function(msg,
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {!proto.protocol.AccountType} */ (reader.readEnum());
-      msg.setType(value);
+      var value = /** @type {!Uint8Array} */ (reader.readBytes());
+      msg.setOwnerAddress(value);
       break;
     case 2:
       var value = /** @type {!Uint8Array} */ (reader.readBytes());
-      msg.setAccountName(value);
+      msg.setAccountAddress(value);
       break;
     case 3:
-      var value = /** @type {!Uint8Array} */ (reader.readBytes());
-      msg.setOwnerAddress(value);
+      var value = /** @type {!proto.protocol.AccountType} */ (reader.readEnum());
+      msg.setType(value);
       break;
     default:
       reader.skipField();
@@ -157,23 +157,23 @@ proto.protocol.AccountCreateContract.prototype.serializeBinary = function() {
  */
 proto.protocol.AccountCreateContract.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getType();
-  if (f !== 0.0) {
-    writer.writeEnum(
+  f = message.getOwnerAddress_asU8();
+  if (f.length > 0) {
+    writer.writeBytes(
       1,
       f
     );
   }
-  f = message.getAccountName_asU8();
+  f = message.getAccountAddress_asU8();
   if (f.length > 0) {
     writer.writeBytes(
       2,
       f
     );
   }
-  f = message.getOwnerAddress_asU8();
-  if (f.length > 0) {
-    writer.writeBytes(
+  f = message.getType();
+  if (f !== 0.0) {
+    writer.writeEnum(
       3,
       f
     );
@@ -182,70 +182,16 @@ proto.protocol.AccountCreateContract.serializeBinaryToWriter = function(message,
 
 
 /**
- * optional AccountType type = 1;
- * @return {!proto.protocol.AccountType}
- */
-proto.protocol.AccountCreateContract.prototype.getType = function() {
-  return /** @type {!proto.protocol.AccountType} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
-};
-
-
-/** @param {!proto.protocol.AccountType} value */
-proto.protocol.AccountCreateContract.prototype.setType = function(value) {
-  jspb.Message.setProto3EnumField(this, 1, value);
-};
-
-
-/**
- * optional bytes account_name = 2;
- * @return {!(string|Uint8Array)}
- */
-proto.protocol.AccountCreateContract.prototype.getAccountName = function() {
-  return /** @type {!(string|Uint8Array)} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
-};
-
-
-/**
- * optional bytes account_name = 2;
- * This is a type-conversion wrapper around `getAccountName()`
- * @return {string}
- */
-proto.protocol.AccountCreateContract.prototype.getAccountName_asB64 = function() {
-  return /** @type {string} */ (jspb.Message.bytesAsB64(
-      this.getAccountName()));
-};
-
-
-/**
- * optional bytes account_name = 2;
- * Note that Uint8Array is not supported on all browsers.
- * @see http://caniuse.com/Uint8Array
- * This is a type-conversion wrapper around `getAccountName()`
- * @return {!Uint8Array}
- */
-proto.protocol.AccountCreateContract.prototype.getAccountName_asU8 = function() {
-  return /** @type {!Uint8Array} */ (jspb.Message.bytesAsU8(
-      this.getAccountName()));
-};
-
-
-/** @param {!(string|Uint8Array)} value */
-proto.protocol.AccountCreateContract.prototype.setAccountName = function(value) {
-  jspb.Message.setProto3BytesField(this, 2, value);
-};
-
-
-/**
- * optional bytes owner_address = 3;
+ * optional bytes owner_address = 1;
  * @return {!(string|Uint8Array)}
  */
 proto.protocol.AccountCreateContract.prototype.getOwnerAddress = function() {
-  return /** @type {!(string|Uint8Array)} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+  return /** @type {!(string|Uint8Array)} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
 
 
 /**
- * optional bytes owner_address = 3;
+ * optional bytes owner_address = 1;
  * This is a type-conversion wrapper around `getOwnerAddress()`
  * @return {string}
  */
@@ -256,7 +202,7 @@ proto.protocol.AccountCreateContract.prototype.getOwnerAddress_asB64 = function(
 
 
 /**
- * optional bytes owner_address = 3;
+ * optional bytes owner_address = 1;
  * Note that Uint8Array is not supported on all browsers.
  * @see http://caniuse.com/Uint8Array
  * This is a type-conversion wrapper around `getOwnerAddress()`
@@ -270,7 +216,61 @@ proto.protocol.AccountCreateContract.prototype.getOwnerAddress_asU8 = function()
 
 /** @param {!(string|Uint8Array)} value */
 proto.protocol.AccountCreateContract.prototype.setOwnerAddress = function(value) {
-  jspb.Message.setProto3BytesField(this, 3, value);
+  jspb.Message.setProto3BytesField(this, 1, value);
+};
+
+
+/**
+ * optional bytes account_address = 2;
+ * @return {!(string|Uint8Array)}
+ */
+proto.protocol.AccountCreateContract.prototype.getAccountAddress = function() {
+  return /** @type {!(string|Uint8Array)} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/**
+ * optional bytes account_address = 2;
+ * This is a type-conversion wrapper around `getAccountAddress()`
+ * @return {string}
+ */
+proto.protocol.AccountCreateContract.prototype.getAccountAddress_asB64 = function() {
+  return /** @type {string} */ (jspb.Message.bytesAsB64(
+      this.getAccountAddress()));
+};
+
+
+/**
+ * optional bytes account_address = 2;
+ * Note that Uint8Array is not supported on all browsers.
+ * @see http://caniuse.com/Uint8Array
+ * This is a type-conversion wrapper around `getAccountAddress()`
+ * @return {!Uint8Array}
+ */
+proto.protocol.AccountCreateContract.prototype.getAccountAddress_asU8 = function() {
+  return /** @type {!Uint8Array} */ (jspb.Message.bytesAsU8(
+      this.getAccountAddress()));
+};
+
+
+/** @param {!(string|Uint8Array)} value */
+proto.protocol.AccountCreateContract.prototype.setAccountAddress = function(value) {
+  jspb.Message.setProto3BytesField(this, 2, value);
+};
+
+
+/**
+ * optional AccountType type = 3;
+ * @return {!proto.protocol.AccountType}
+ */
+proto.protocol.AccountCreateContract.prototype.getType = function() {
+  return /** @type {!proto.protocol.AccountType} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
+};
+
+
+/** @param {!proto.protocol.AccountType} value */
+proto.protocol.AccountCreateContract.prototype.setType = function(value) {
+  jspb.Message.setProto3EnumField(this, 3, value);
 };
 
 
