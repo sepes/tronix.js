@@ -1,4 +1,6 @@
-const { EmptyMessage, NumberMessage, BytesMessage } = require('../protocol/api/api_pb');
+const {
+  EmptyMessage, NumberMessage, BytesMessage, TimeMessage,
+} = require('../protocol/api/api_pb');
 const {
   getBase58CheckAddress, passwordToAddress, decode58Check,
 } = require('../utils/crypto');
@@ -7,7 +9,7 @@ const { deserializeTransaction } = require('../protocol/serializer');
 const { Account } = require('../protocol/core/Tron_pb');
 const { WalletClient } = require('../protocol/api/api_grpc_pb');
 const caller = require('grpc-caller');
-const { stringToBytes } = require('../lib/code');
+const { stringToBytes, hexStr2byteArray } = require('../lib/code');
 
 class GrpcClient {
   constructor(options) {
@@ -40,8 +42,8 @@ class GrpcClient {
    *
    * @returns {Promise<*>}
    */
-  async getNodes() {
-    return await this.api.listNodes(new EmptyMessage())
+  getNodes() {
+    return this.api.listNodes(new EmptyMessage())
       .then(x => x.getNodesList());
   }
 
@@ -59,7 +61,7 @@ class GrpcClient {
       totalSupply: ai.getTotalSupply(),
       trxNum: ai.getTrxNum() / 1000,
       num: ai.getNum(),
-      abbr: ai.getAbbr(),
+      abbr: bytesToString(ai.getAbbr()),
     }));
     return assetsList;
   }
@@ -81,7 +83,7 @@ class GrpcClient {
       trxNum: assetIssue.getTrxNum() / 1000,
       num: assetIssue.getNum(),
       frozenSupplyList: assetIssue.getFrozenSupplyList(),
-      abbr: assetIssue.getAbbr(),
+      abbr: bytesToString(assetIssue.getAbbr()),
     };
   }
 
@@ -155,6 +157,13 @@ class GrpcClient {
     lastBlock.parentHash = byteArray2hexStr(rawData.getParenthash());
     delete lastBlock.blockHeader;
     return lastBlock;
+  }
+
+  async getTransactionById(txHash) {
+    const txByte = new BytesMessage();
+    txByte.setValue(new Uint8Array(hexStr2byteArray(txHash.toUpperCase())));
+    const transaction = await this.api.getTransactionById(txByte);
+    return deserializeTransaction(transaction)[0];
   }
 
   async getTotalTransaction() {

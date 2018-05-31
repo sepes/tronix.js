@@ -1,5 +1,5 @@
 const {
-  EmptyMessage, NumberMessage, BytesMessage, TimeMessage, AccountPaginated,
+  EmptyMessage, NumberMessage, AccountPaginated,
 } = require('../protocol/api/api_pb');
 const {
   getBase58CheckAddress, passwordToAddress, decode58Check,
@@ -9,7 +9,6 @@ const { deserializeTransaction } = require('../protocol/serializer');
 const { Account } = require('../protocol/core/Tron_pb');
 const { WalletSolidityClient, WalletExtensionClient } = require('../protocol/api/api_grpc_pb');
 const caller = require('grpc-caller');
-const { stringToBytes, hexStr2byteArray } = require('../lib/code');
 
 class SolidityGrpcClient {
   constructor(options) {
@@ -21,21 +20,6 @@ class SolidityGrpcClient {
      */
     this.api = caller(`${this.hostname}:${this.port}`, WalletSolidityClient);
     this.api_extension = caller(`${this.hostname}:${this.port}`, WalletExtensionClient);
-  }
-
-  /**
-   * Retrieve all connected witnesses
-   *
-   * @returns {Promise<*>}
-   */
-  async getWitnesses() {
-    const witnesses = await this.api.listWitnesses(new EmptyMessage())
-      .then(x => x.getWitnessesList());
-    return witnesses.map((w) => {
-      const witness = w.toObject();
-      witness.address = getBase58CheckAddress(Array.from(w.getAddress()));
-      return witness;
-    });
   }
 
   async getAssetIssueList() {
@@ -57,25 +41,19 @@ class SolidityGrpcClient {
     return assetsList;
   }
 
-  async getAssetIssueByName(assetName) {
-    const assetByte = new BytesMessage();
-    assetByte.setValue(new Uint8Array(stringToBytes(assetName)));
-
-    const assetIssue = await this.api.getAssetIssueByName(assetByte);
-    return {
-      ownerAddress: getBase58CheckAddress(Array.from(assetIssue.getOwnerAddress())),
-      url: bytesToString(assetIssue.getUrl()),
-      name: bytesToString(assetIssue.getName()),
-      description: bytesToString(assetIssue.getDescription()),
-      startTime: assetIssue.getStartTime(),
-      endTime: assetIssue.getEndTime(),
-      voteScore: assetIssue.getVoteScore(),
-      totalSupply: assetIssue.getTotalSupply(),
-      trxNum: assetIssue.getTrxNum() / 1000,
-      num: assetIssue.getNum(),
-      frozenSupplyList: assetIssue.getFrozenSupplyList(),
-      abbr: bytesToString(assetIssue.getAbbr()),
-    };
+  /**
+   * Retrieve all connected witnesses
+   *
+   * @returns {Promise<*>}
+   */
+  async getWitnesses() {
+    const witnesses = await this.api.listWitnesses(new EmptyMessage())
+      .then(x => x.getWitnessesList());
+    return witnesses.map((w) => {
+      const witness = w.toObject();
+      witness.address = getBase58CheckAddress(Array.from(w.getAddress()));
+      return witness;
+    });
   }
 
   /**
@@ -150,13 +128,6 @@ class SolidityGrpcClient {
     return lastBlock;
   }
 
-  async getTransactionById(txHash) {
-    const txByte = new BytesMessage();
-    txByte.setValue(new Uint8Array(hexStr2byteArray(txHash.toUpperCase())));
-    const transaction = await this.api_extension.getTransactionById(txByte);
-    return deserializeTransaction(transaction)[0];
-  }
-
   async getTransactionsToThis(address) {
     const accountArg = new Account();
     accountArg.setAddress(new Uint8Array(decode58Check(address)));
@@ -179,20 +150,6 @@ class SolidityGrpcClient {
     const accountRaw = await this.api_extension.getTransactionsFromThis(accountPag);
     const account = accountRaw.getTransactionList().map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
     return account.filter(x => !!x);
-  }
-
-  async getTransactionsByTimestamp(init, end) {
-    const timeArg = new TimeMessage();
-    timeArg.setBegininmilliseconds(init);
-    timeArg.setEndinmilliseconds(end);
-    const txBwTime = await this.api.getTransactionsByTimestamp(timeArg);
-    const txs = txBwTime.getTransactionList().map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
-    return txs.filter(x => !!x);
-  }
-
-  async getTotalTransaction() {
-    const totalTransactions = await this.api.totalTransaction(new EmptyMessage());
-    return totalTransactions.toObject().num;
   }
 }
 
