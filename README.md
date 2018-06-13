@@ -1,10 +1,10 @@
 <h1 align="center">
-  node-wallet-api
-  <br>
+  	tronix.js
+	<br>
 </h1>
 
 <h4 align="center">
-  Node.js Wallet API for the <a href="https://tron.network">Tron Protocol</a>
+  Javascript API for the <a href="https://tron.network">Tron Protocol</a>
 </h4>
 
 <p align="center">
@@ -16,38 +16,11 @@
 
 # How to use
 
+WIP
+
 ## Requirements
 
-* Node v9.8.0
-
-## Running tests
-
-Running the tests requires an active `wallet-cli` application. 
-Check out to the [readme](https://github.com/tronprotocol/wallet-cli) to get it up and running.
-
-When there is a running `wallet-cli` application use `npm` to run the tests
-
-```bash
-> npm test
-```
-
-## Usage
-
-Install the package
-
-```bash
-> npm install https://github.com/deblanco/node-wallet-api
-```
-
-Use the HTTP Client
-
-```javascript
-import {HttpClient} from "@tronprotocol/wallet-api";
-
-const Client = new HttpClient();
-
-let latestBlock = await Client.getLatestBlock();
-```
+* Node >= v8
 
 # Community
 
