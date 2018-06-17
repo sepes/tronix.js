@@ -5,7 +5,7 @@ const {
   getBase58CheckAddress, passwordToAddress, decode58Check,
 } = require('../utils/crypto');
 const { byteArray2hexStr, bytesToString } = require('../utils/bytes');
-const { deserializeTransaction } = require('../protocol/serializer');
+const { deserializeTransaction, deserializeTransactions } = require('../utils/transaction');
 const { Account } = require('../protocol/core/Tron_pb');
 const { WalletClient } = require('../protocol/api/api_grpc_pb');
 const caller = require('grpc-caller');
@@ -50,7 +50,7 @@ class GrpcClient {
   async getAssetIssueList() {
     const assetsListRaw = await this.api.getAssetIssueList(new EmptyMessage())
       .then(x => x.getAssetissueList());
-    const assetsList = assetsListRaw.map(ai => ({
+    return assetsListRaw.map(ai => ({
       ownerAddress: getBase58CheckAddress(Array.from(ai.getOwnerAddress())),
       url: bytesToString(ai.getUrl()),
       name: bytesToString(ai.getName()),
@@ -63,7 +63,6 @@ class GrpcClient {
       num: ai.getNum(),
       abbr: bytesToString(ai.getAbbr()),
     }));
-    return assetsList;
   }
 
   async getAssetIssueByName(assetName) {
@@ -126,7 +125,7 @@ class GrpcClient {
     const blockRaw = await this.api.getBlockByNum(message);
     const block = blockRaw.toObject();
     const rawData = blockRaw.getBlockHeader().getRawData();
-    block.transactionsList = blockRaw.getTransactionsList().map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
+    block.transactionsList = deserializeTransactions(blockRaw.getTransactionsList());
     block.transactionsCount = block.transactionsList.length;
     block.totalTrx = block.transactionsList.reduce((t, n) => t + ((n && n.amount) ? n.amount : 0), 0);
     block.size = blockRaw.serializeBinary().length;
@@ -147,7 +146,7 @@ class GrpcClient {
     const lastBlockRaw = await this.api.getNowBlock(new EmptyMessage());
     const lastBlock = lastBlockRaw.toObject();
     const rawData = lastBlockRaw.getBlockHeader().getRawData();
-    lastBlock.transactionsList = lastBlockRaw.getTransactionsList().map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
+    lastBlock.transactionsList = deserializeTransactions(lastBlockRaw.getTransactionsList());
     lastBlock.transactionsCount = lastBlock.transactionsList.length;
     lastBlock.totalTrx = lastBlock.transactionsList.reduce((t, n) => t + ((n && n.amount) ? n.amount : 0), 0);
     lastBlock.size = rawData.serializeBinary().length;

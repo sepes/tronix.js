@@ -1,9 +1,8 @@
-const ADDRESS_PREFIX = "a0";
+const ADDRESS_PREFIX = 'a0';
 const ADDRESS_SIZE = 42;
 
 
 function isAddressValid(address) {
-
   if (!address || address.length === 0) {
     return false;
   }

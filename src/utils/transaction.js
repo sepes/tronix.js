@@ -1,26 +1,30 @@
-const decode58Check = require("./crypto").decode58Check;
-const {Transaction} = require("../protocol/core/Tron_pb");
+const {
+  FreezeBalanceContract, UnfreezeBalanceContract, WitnessCreateContract, TransferContract,
+} = require('../protocol/core/Contract_pb');
+const { getBase58CheckAddress, SHA256, decode58Check } = require('./crypto');
+const { base64DecodeFromString } = require('../lib/code');
+const { Transaction } = require('../protocol/core/Tron_pb');
+const { byteArray2hexStr } = require('../utils/bytes');
 const google_protobuf_any_pb = require('google-protobuf/google/protobuf/any_pb.js');
-const {FreezeBalanceContract, UnfreezeBalanceContract, WitnessCreateContract} = require("../protocol/core/Contract_pb");
-const base64DecodeFromString = require("../lib/code").base64DecodeFromString;
+
 
 function encodeString(str) {
   return Uint8Array.from(base64DecodeFromString(btoa(str)));
 }
 
 function buildTransferContract(message, contractType, typeName) {
-  var anyValue = new google_protobuf_any_pb.Any();
-  anyValue.pack(message.serializeBinary(), "protocol." + typeName);
+  const anyValue = new google_protobuf_any_pb.Any();
+  anyValue.pack(message.serializeBinary(), `protocol.${typeName}`);
 
-  var contract = new Transaction.Contract();
+  const contract = new Transaction.Contract();
   contract.setType(contractType);
   contract.setParameter(anyValue);
 
-  var raw = new Transaction.raw();
+  const raw = new Transaction.raw();
   raw.addContract(contract);
   raw.setTimestamp(new Date().getTime() * 1000000);
 
-  var transaction = new Transaction();
+  const transaction = new Transaction();
   transaction.setRawData(raw);
 
   return transaction;
@@ -34,7 +38,7 @@ function buildTransferContract(message, contractType, typeName) {
  * @param duration Duration in days
  */
 function buildFreezeBalance(address, amount, duration) {
-  var contract = new FreezeBalanceContract();
+  const contract = new FreezeBalanceContract();
 
   contract.setOwnerAddress(Uint8Array.from(decode58Check(address)));
   contract.setFrozenBalance(amount);
@@ -43,7 +47,8 @@ function buildFreezeBalance(address, amount, duration) {
   return buildTransferContract(
     contract,
     Transaction.Contract.ContractType.FREEZEBALANCECONTRACT,
-    "FreezeBalanceContract");
+    'FreezeBalanceContract',
+  );
 }
 
 /**
@@ -52,14 +57,15 @@ function buildFreezeBalance(address, amount, duration) {
  * @param address From which address to freze
  */
 function buildUnfreezeBalance(address) {
-  var contract = new UnfreezeBalanceContract();
+  const contract = new UnfreezeBalanceContract();
 
   contract.setOwnerAddress(Uint8Array.from(decode58Check(address)));
 
   return buildTransferContract(
     contract,
     Transaction.Contract.ContractType.UNFREEZEBALANCECONTRACT,
-    "UnfreezeBalanceContract");
+    'UnfreezeBalanceContract',
+  );
 }
 
 /**
@@ -69,7 +75,7 @@ function buildUnfreezeBalance(address) {
  * @param url url
  */
 function buildApplyForDelegate(address, url) {
-  var contract = new WitnessCreateContract();
+  const contract = new WitnessCreateContract();
 
   contract.setOwnerAddress(Uint8Array.from(decode58Check(address)));
   contract.setUrl(encodeString(url));
@@ -77,11 +83,74 @@ function buildApplyForDelegate(address, url) {
   return buildTransferContract(
     contract,
     Transaction.Contract.ContractType.WITNESSCREATECONTRACT,
-    "WitnessCreateContract");
+    'WitnessCreateContract',
+  );
+}
+
+
+function deserializeTransaction(tx) {
+  try {
+    const contractType = Transaction.Contract.ContractType;
+
+    const contractList = tx.getRawData().getContractList();
+
+    const transactions = [];
+
+    contractList.forEach((contract) => {
+      const any = contract.getParameter();
+
+      switch (contract.getType()) {
+        case contractType.ACCOUNTCREATECONTRACT: {
+          const obje = any.unpack(AccountCreateContract.deserializeBinary, 'protocol.AccountCreateContract');
+          transactions.push({});
+        }
+          break;
+
+        default:
+        case contractType.TRANSFERCONTRACT: {
+        // let contractType = contractType .TRANSFERCONTRACT;
+
+          const obje = any.unpack(TransferContract.deserializeBinary, 'protocol.TransferContract');
+
+          const owner = obje.getOwnerAddress();
+          const ownerHex = getBase58CheckAddress(Array.from(owner));
+
+          const to = obje.getToAddress();
+          const toHex = getBase58CheckAddress(Array.from(to));
+
+          const amount = obje.getAmount() / 1000000;
+
+          const rawData = tx.getRawData();
+          const hash = byteArray2hexStr(SHA256(rawData.serializeBinary()));
+
+          transactions.push({
+            hash,
+            from: ownerHex,
+            to: toHex,
+            amount,
+            time: tx.getRawData().getTimestamp(),
+            data: rawData.getData(),
+            scripts: rawData.getScripts(),
+          });
+        }
+          break;
+      }
+    });
+
+    return transactions;
+  } catch (err) {
+    return [null];
+  }
+}
+
+function deserializeTransactions(transactionsList = []) {
+  return transactionsList.filter(t => !!t).map(tx => deserializeTransaction(tx)[0]);
 }
 
 module.exports = {
   buildFreezeBalance,
   buildUnfreezeBalance,
   buildApplyForDelegate,
+  deserializeTransaction,
+  deserializeTransactions,
 };

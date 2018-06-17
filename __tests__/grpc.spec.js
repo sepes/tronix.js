@@ -1,4 +1,4 @@
-const { getNodes } = require('../src/utils/nodes');
+const { getTronscanNodes } = require('../src/utils/nodes');
 const { GrpcClient } = require('../src');
 
 describe('GrpcClient', async () => {
@@ -6,7 +6,7 @@ describe('GrpcClient', async () => {
   let client;
 
   beforeAll(async () => {
-    testNode = await getNodes();
+    testNode = await getTronscanNodes();
 
     client = new GrpcClient({
       hostname: testNode[0].ip,
@@ -25,5 +25,4 @@ describe('GrpcClient', async () => {
     const witnesses = await client.getWitnesses();
     expect(witnesses.length).toBeGreaterThan(0);
   });
-
 });
