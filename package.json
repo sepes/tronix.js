@@ -6,7 +6,7 @@
   "homepage": "https://tron.network/",
   "scripts": {
     "test": "mocha",
-    "protoc:install": "cd protocol && ./install-protobuf.sh",
+    "protoc:install": "cd protocol && ./install-protobuf.sh && ./install-googleapis.sh",
     "protoc:generate": "./protocol/protobuf-3.5.1/src/.libs/protoc --proto_path=protocol/protobuf-3.5.1/src --proto_path=protocol --grpc_out=./src/protocol --plugin=protoc-gen-grpc=`which grpc_tools_node_protoc_plugin` --js_out=import_style=commonjs,binary:src/protocol protocol/core/*.proto protocol/api/*.proto",
     "test:watch": "mocha --watch"
   },
