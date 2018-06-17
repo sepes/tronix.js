@@ -67,6 +67,6 @@ typings/
 
 ./protocol
 protocol
-test/playground.js
+playground.js
 
 .DS_Store

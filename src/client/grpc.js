@@ -1,5 +1,5 @@
 const {
-  EmptyMessage, NumberMessage, BytesMessage, TimeMessage,
+  EmptyMessage, NumberMessage, BytesMessage,
 } = require('../protocol/api/api_pb');
 const {
   getBase58CheckAddress, passwordToAddress, decode58Check,
