@@ -51,7 +51,6 @@ function deserializeTransaction(tx) {
       const contractType = contract.getType();
       let transaction = any.unpack(ContractTable[contractType][0], ContractTable[contractType][1]);
       transaction = transaction.toObject();
-      //transaction.amount = obje.amount / 1000000; //TODO maybe remove in a future
 
       transaction.hash = byteArray2hexStr(SHA256(tx.getRawData().serializeBinary()))
       transaction.time = tx.getRawData().getTimestamp();
