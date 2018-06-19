@@ -62,6 +62,11 @@ function deserializeTransaction(tx) {
   }
 }
 
+function deserializeTransactions(transactionsList = []) {
+  return transactionsList.filter(t => !!t).map(tx => deserializeTransaction(tx)[0]);
+}
+
 module.exports = {
   deserializeTransaction,
+  deserializeTransactions,
 };
