@@ -1,18 +1,16 @@
+const {ADDRESS_PREFIX, ADDRESS_PREFIX_BYTE} = require("./address");
 const base64EncodeToString = require("../lib/code").base64EncodeToString;
 const {base64DecodeFromString, hexStr2byteArray} = require("../lib/code");
 const {encode58, decode58} = require("../lib/base58");
 const EC = require('elliptic').ec;
 const { keccak256 } = require('js-sha3');
 const jsSHA = require("../lib/sha256");
+const ADDRESS_SIZE = require("./address").ADDRESS_SIZE;
 const { byte2hexStr, byteArray2hexStr } = require("./bytes");
-
-const add_pre_fix = 'a0'; //a0 + address  ,a0 is version
-const add_pre_fix_byte = 0xa0;   //a0 + address  ,a0 is version
 
 /**
  * Sign A Transaction by priKey.
  * signature is 65 bytes, r[32] || s[32] || id[1](<27)
- *
  * @returns  a Transaction object signed
  * @param priKeyBytes: privateKey for ECC
  * @param transaction: a Transaction object unSigned
@@ -33,7 +31,26 @@ function signTransaction(priKeyBytes, transaction) {
     transaction.addSignature(uint8Array);
   }
 
-  return transaction;
+  return {
+    transaction,
+    hex: byteArray2hexStr(transaction.serializeBinary()),
+  };
+}
+
+function arrayToBase64String(a) {
+  return btoa(String.fromCharCode(...a));
+}
+
+function signBytes(privateKey, contents) {
+
+  if (typeof privateKey === 'string') {
+    privateKey = hexStr2byteArray(privateKey);
+  }
+
+  let hashBytes = SHA256(contents);
+  let signBytes = ECKeySign(hashBytes, privateKey);
+
+  return signBytes;
 }
 
 //return bytes of rowdata, use to sign.
@@ -65,16 +82,14 @@ function computeAddress(pubBytes) {
 
   var hash = keccak256(pubBytes).toString();
   var addressHex = hash.substring(24);
-  addressHex = add_pre_fix + addressHex;
-  var addressBytes = hexStr2byteArray(addressHex);
-  return addressBytes;
+  addressHex = ADDRESS_PREFIX + addressHex;
+  return hexStr2byteArray(addressHex);
 }
 
 //return address by bytes, priKeyBytes is byte[]
 function getAddressFromPriKey(priKeyBytes) {
   let pubBytes = getPubKeyFromPriKey(priKeyBytes);
-  let addressBytes = computeAddress(pubBytes);
-  return addressBytes;
+  return computeAddress(pubBytes);
 }
 
 //return address by Base58Check String,
@@ -83,16 +98,14 @@ function getBase58CheckAddress(addressBytes) {
   var hash1 = SHA256(hash0);
   var checkSum = hash1.slice(0, 4);
   checkSum = addressBytes.concat(checkSum);
-  var base58Check = encode58(checkSum);
-
-  return base58Check;
+  return encode58(checkSum);
 }
-
 
 function decode58Check(addressStr) {
 
   var decodeCheck = decode58(addressStr);
   if (decodeCheck.length <= 4) {
+    console.error("ERROR CHECK");
     return null;
   }
 
@@ -110,31 +123,36 @@ function decode58Check(addressStr) {
   return null;
 }
 
+function isAddressValid(base58Str) {
+  try {
+    if (typeof(base58Str) !== 'string') {
+      return false;
+    }
+    if (base58Str.length !== ADDRESS_SIZE) {
+      return false;
+    }
+    var address = decode58(base58Str);
 
-function isAddressValid(base58Sting) {
-  if (typeof(base58Sting) != 'string') {
-    return false;
+    if (address.length !== 25) {
+      return false;
+    }
+    if (address[0] !== ADDRESS_PREFIX_BYTE) {
+      return false;
+    }
+    var checkSum = address.slice(21);
+    address = address.slice(0, 21);
+    var hash0 = SHA256(address);
+    var hash1 = SHA256(hash0);
+    var checkSum1 = hash1.slice(0, 4);
+    if (checkSum[0] == checkSum1[0] && checkSum[1] == checkSum1[1] && checkSum[2]
+        == checkSum1[2] && checkSum[3] == checkSum1[3]
+    ) {
+      return true
+    }
+  } catch(e) {
+    // ignore
   }
-  if (base58Sting.length != 35) {
-    return false;
-  }
-  var address = decode58(base58Sting);
-  if (address.length != 25) {
-    return false;
-  }
-  if (address[0] != add_pre_fix_byte) {
-    return false;
-  }
-  var checkSum = address.slice(21);
-  address = address.slice(0, 21);
-  var hash0 = SHA256(address);
-  var hash1 = SHA256(hash0);
-  var checkSum1 = hash1.slice(0, 4);
-  if (checkSum[0] == checkSum1[0] && checkSum[1] == checkSum1[1] && checkSum[2]
-      == checkSum1[2] && checkSum[3] == checkSum1[3]
-  ) {
-    return true
-  }
+
   return false;
 }
 
@@ -191,6 +209,7 @@ function ECKeySign(hashBytes, priKeyBytes) {
   let r = signature.r;
   let s = signature.s;
   let id = signature.recoveryParam;
+
   let rHex = r.toString('hex');
   while (rHex.length < 64) {
     rHex = "0" + rHex;
@@ -204,7 +223,7 @@ function ECKeySign(hashBytes, priKeyBytes) {
   return hexStr2byteArray(signHex);
 }
 
-
+//toDO:
 //return 32 bytes
 function SHA256(msgBytes) {
   let shaObj = new jsSHA("SHA-256", "HEX");
@@ -220,22 +239,22 @@ function passwordToAddress(password) {
   return getBase58CheckAddress(com_addressBytes);
 }
 
-function privateKeyToAddress(password) {
-  let com_priKeyBytes = hexStr2byteArray(password);
+function pkToAddress(privateKey) {
+  let com_priKeyBytes = hexStr2byteArray(privateKey);
   let com_addressBytes = getAddressFromPriKey(com_priKeyBytes);
   return getBase58CheckAddress(com_addressBytes);
 }
 
 module.exports = {
   signTransaction,
-  SHA256,
   passwordToAddress,
   genPriKey,
   getAddressFromPriKey,
   getPubKeyFromPriKey,
   getBase58CheckAddress,
   isAddressValid,
-  privateKeyToAddress,
   getBase58CheckAddressFromPriKeyBase64String,
+  pkToAddress,
   decode58Check,
+  signBytes,
 };
