@@ -137,7 +137,7 @@ class SolidityGrpcClient {
     accountPag.setOffset(offset);
     const accountRaw = await this.api_extension.getTransactionsToThis(accountPag);
     const account = deserializeTransactions(accountRaw.getTransactionList());
-    return account.filter(x => !!x);
+    return account;
   }
 
   async getTransactionsFromThis(address, limit = 1000, offset = 0) {
@@ -149,7 +149,7 @@ class SolidityGrpcClient {
     accountPag.setOffset(offset);
     const accountRaw = await this.api_extension.getTransactionsFromThis(accountPag);
     const account = deserializeTransactions(accountRaw.getTransactionList());
-    return account.filter(x => !!x);
+    return account;
   }
 }
 
