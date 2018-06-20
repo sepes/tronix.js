@@ -1,3 +1,4 @@
+const fetch = require('node-fetch');
 const { GrpcClient } = require('../src');
 
 const getTronscanNodes = async () => {
