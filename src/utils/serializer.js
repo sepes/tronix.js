@@ -50,20 +50,19 @@ function deserializeTransaction(tx) {
       const contractType = contract.getType();
       let transaction = any.unpack(ContractTable[contractType][0], ContractTable[contractType][1]);
       transaction = transaction.toObject();
-
+      transaction.contractType = contractType;
       transaction.hash = byteArray2hexStr(SHA256(tx.getRawData().serializeBinary()));
       transaction.time = tx.getRawData().getTimestamp();
       transactions.push(transaction);
     });
-
     return transactions;
   } catch (err) {
     return [null];
   }
 }
 
-function deserializeTransactions(transactionsList = []) {
-  return transactionsList.filter(t => !!t).map(tx => deserializeTransaction(tx)[0]);
+function deserializeTransactions(transactionsList = []) {;
+  return transactionsList.map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
 }
 
 module.exports = {
