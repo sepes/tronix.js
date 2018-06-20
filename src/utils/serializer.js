@@ -1,5 +1,6 @@
-const { SHA256 } = require('../utils/crypto');
+const { SHA256, getBase58CheckAddress } = require('../utils/crypto');
 const { byteArray2hexStr } = require('../utils/bytes');
+const { base64DecodeFromString } = require('../lib/code');
 const { Transaction } = require('../protocol/core/Tron_pb');
 const {
   AccountCreateContract, // To delete in a future?
@@ -50,9 +51,11 @@ function deserializeTransaction(tx) {
       const contractType = contract.getType();
       let transaction = any.unpack(ContractTable[contractType][0], ContractTable[contractType][1]);
       transaction = transaction.toObject();
+      transaction = decodeTxAddresses(transaction);
       transaction.contractType = contractType;
       transaction.hash = byteArray2hexStr(SHA256(tx.getRawData().serializeBinary()));
       transaction.time = tx.getRawData().getTimestamp();
+
       transactions.push(transaction);
     });
     return transactions;
@@ -61,8 +64,19 @@ function deserializeTransaction(tx) {
   }
 }
 
-function deserializeTransactions(transactionsList = []) {;
+function deserializeTransactions(transactionsList = []) {
   return transactionsList.map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
+}
+
+function decodeTxAddresses(txObj) {
+  const txObjDecoded = txObj;
+  if (txObj.ownerAddress) {
+    txObjDecoded.ownerAddress = getBase58CheckAddress(base64DecodeFromString(txObj.ownerAddress));
+  }
+  if (txObj.toAddress) {
+    txObjDecoded.toAddress = getBase58CheckAddress(base64DecodeFromString(txObj.toAddress));
+  }
+  return txObjDecoded;
 }
 
 module.exports = {
