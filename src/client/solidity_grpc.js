@@ -5,7 +5,7 @@ const {
   getBase58CheckAddress, passwordToAddress, decode58Check,
 } = require('../utils/crypto');
 const { byteArray2hexStr, bytesToString } = require('../utils/bytes');
-const { deserializeTransaction } = require('../utils/serializer');
+const { deserializeTransaction, deserializeTransactions } = require('../utils/serializer');
 const { Account } = require('../protocol/core/Tron_pb');
 const { WalletSolidityClient, WalletExtensionClient } = require('../protocol/api/api_grpc_pb');
 const caller = require('grpc-caller');
@@ -95,7 +95,7 @@ class SolidityGrpcClient {
     const blockRaw = await this.api.getBlockByNum(message);
     const block = blockRaw.toObject();
     const rawData = blockRaw.getBlockHeader().getRawData();
-    block.transactionsList = blockRaw.getTransactionsList().map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
+    block.transactionsList = deserializeTransactions(blockRaw.getTransactionsList());
     block.transactionsCount = block.transactionsList.length;
     block.totalTrx = block.transactionsList.reduce((t, n) => t + ((n && n.amount) ? n.amount : 0), 0);
     block.size = blockRaw.serializeBinary().length;
@@ -116,7 +116,7 @@ class SolidityGrpcClient {
     const lastBlockRaw = await this.api.getNowBlock(new EmptyMessage());
     const lastBlock = lastBlockRaw.toObject();
     const rawData = lastBlockRaw.getBlockHeader().getRawData();
-    lastBlock.transactionsList = lastBlockRaw.getTransactionsList().map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
+    lastBlock.transactionsList = deserializeTransactions(lastBlockRaw.getTransactionsList());
     lastBlock.transactionsCount = lastBlock.transactionsList.length;
     lastBlock.totalTrx = lastBlock.transactionsList.reduce((t, n) => t + ((n && n.amount) ? n.amount : 0), 0);
     lastBlock.size = rawData.serializeBinary().length;
@@ -128,27 +128,27 @@ class SolidityGrpcClient {
     return lastBlock;
   }
 
-  async getTransactionsToThis(address) {
+  async getTransactionsToThis(address, limit = 1000, offset = 0) {
     const accountArg = new Account();
     accountArg.setAddress(new Uint8Array(decode58Check(address)));
     const accountPag = new AccountPaginated();
     accountPag.setAccount(accountArg);
-    accountPag.setLimit(1000);
-    accountPag.setOffset(0);
+    accountPag.setLimit(limit);
+    accountPag.setOffset(offset);
     const accountRaw = await this.api_extension.getTransactionsToThis(accountPag);
-    const account = accountRaw.getTransactionList().map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
+    const account = deserializeTransactions(accountRaw.getTransactionList());
     return account.filter(x => !!x);
   }
 
-  async getTransactionsFromThis(address) {
+  async getTransactionsFromThis(address, limit = 1000, offset = 0) {
     const accountArg = new Account();
     accountArg.setAddress(new Uint8Array(decode58Check(address)));
     const accountPag = new AccountPaginated();
     accountPag.setAccount(accountArg);
-    accountPag.setLimit(1000);
-    accountPag.setOffset(0);
+    accountPag.setLimit(limit);
+    accountPag.setOffset(offset);
     const accountRaw = await this.api_extension.getTransactionsFromThis(accountPag);
-    const account = accountRaw.getTransactionList().map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
+    const account = deserializeTransactions(accountRaw.getTransactionList());
     return account.filter(x => !!x);
   }
 }
