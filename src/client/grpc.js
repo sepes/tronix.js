@@ -180,10 +180,8 @@ class GrpcClient {
   }
 
   async broadcastTransaction(transaction) {
-    let broadcastTransactionAnswer = await this.api.broadcastTransaction(transaction);
-    //TODO decode result message like this one
-    broadcastTransactionAnswer = broadcastTransactionAnswer.toObject();
-    return broadcastTransactionAnswer;
+    const broadcastTransactionAnswer = await this.api.broadcastTransaction(transaction);
+    return broadcastTransactionAnswer.toObject();
   }
 }
 

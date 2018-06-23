@@ -69,13 +69,15 @@ function deserializeTransactions(transactionsList = []) {
 }
 
 function decodeTxAddresses(txObj) {
+  const addressFields = ['ownerAddress', 'toAddress', 'voteAddress'];
   const txObjDecoded = txObj;
-  if (txObj.ownerAddress) {
-    txObjDecoded.ownerAddress = getBase58CheckAddress(base64DecodeFromString(txObj.ownerAddress));
-  }
-  if (txObj.toAddress) {
-    txObjDecoded.toAddress = getBase58CheckAddress(base64DecodeFromString(txObj.toAddress));
-  }
+  Object.keys(txObjDecoded).forEach((key) => {
+    if (Array.isArray(txObjDecoded[key])) {
+      txObjDecoded[key].forEach(decodeTxAddresses);
+    } else if (addressFields.some(k => k === key)) {
+      txObjDecoded[key] = getBase58CheckAddress(base64DecodeFromString(txObjDecoded[key]));
+    }
+  });
   return txObjDecoded;
 }
 
