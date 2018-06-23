@@ -168,6 +168,11 @@ class GrpcClient {
     const nextMaintenanceTime = await this.api.getNextMaintenanceTime(new EmptyMessage());
     return nextMaintenanceTime.toObject();
   }
+
+  async broadcastTransaction(transaction) {
+    const broadcastTransactionAnswer = await this.api.broadcastTransaction(transaction);
+    return broadcastTransactionAnswer.toObject();
+  }
 }
 
 module.exports = GrpcClient;
