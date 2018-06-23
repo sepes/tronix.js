@@ -1,5 +1,5 @@
 
-const { deserializeTransactions } = require('../utils/serializer');
+const { deserializeTransactions } = require('../utils/transaction');
 const { getBase58CheckAddress } = require('../utils/crypto');
 const { byteArray2hexStr } = require('../utils/bytes');
 const { base64DecodeFromString } = require('../lib/code');

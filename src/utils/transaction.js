@@ -1,7 +1,8 @@
-const { decode58Check, SHA256, ECKeySign } = require('./crypto');
-const { longToByteArray } = require('./bytes');
+const {
+  getBase58CheckAddress, decode58Check, SHA256, ECKeySign,
+} = require('./crypto');
+const { longToByteArray, byteArray2hexStr, bytesToString } = require('./bytes');
 const { hexStr2byteArray } = require('../lib/code');
-
 const { Transaction } = require('../protocol/core/Tron_pb');
 const google_protobuf_any_pb = require('google-protobuf/google/protobuf/any_pb.js');
 const { base64DecodeFromString } = require('../lib/code');
@@ -18,15 +19,86 @@ const {
   WithdrawBalanceContract,
   WitnessCreateContract,
   UnfreezeAssetContract,
+  AccountCreateContract,
+  VoteAssetContract,
+  DeployContract,
+  UpdateAssetContract,
 } = require('../protocol/core/Contract_pb');
+
+const ContractType = Transaction.Contract.ContractType;
+const ContractTable = {};
+ContractTable[ContractType.ACCOUNTCREATECONTRACT] = [AccountCreateContract.deserializeBinary, 'protocol.AccountCreateContract'];
+ContractTable[ContractType.TRANSFERCONTRACT] = [TransferContract.deserializeBinary, 'protocol.TransferContract'];
+ContractTable[ContractType.TRANSFERASSETCONTRACT] = [TransferAssetContract.deserializeBinary, 'protocol.TransferAssetContract'];
+ContractTable[ContractType.VOTEASSETCONTRACT] = [VoteAssetContract.deserializeBinary, 'protocol.VoteAssetContract'];
+ContractTable[ContractType.VOTEWITNESSCONTRACT] = [VoteWitnessContract.deserializeBinary, 'protocol.VoteWitnessContract'];
+ContractTable[ContractType.ASSETISSUECONTRACT] = [AssetIssueContract.deserializeBinary, 'protocol.AssetIssueContract'];
+ContractTable[ContractType.DEPLOYCONTRACT] = [DeployContract.deserializeBinary, 'protocol.DeployContract'];
+ContractTable[ContractType.WITNESSUPDATECONTRACT] = [WitnessUpdateContract.deserializeBinary, 'protocol.WitnessUpdateContract'];
+ContractTable[ContractType.PARTICIPATEASSETISSUECONTRACT] = [ParticipateAssetIssueContract.deserializeBinary, 'protocol.ParticipateAssetIssueContract'];
+ContractTable[ContractType.FREEZEBALANCECONTRACT] = [FreezeBalanceContract.deserializeBinary, 'protocol.FreezeBalanceContract'];
+ContractTable[ContractType.UNFREEZEBALANCECONTRACT] = [UnfreezeBalanceContract.deserializeBinary, 'protocol.UnfreezeBalanceContract'];
+ContractTable[ContractType.WITHDRAWBALANCECONTRACT] = [WithdrawBalanceContract.deserializeBinary, 'protocol.WithdrawBalanceContract'];
+ContractTable[ContractType.UNFREEZEASSETCONTRACT] = [UnfreezeAssetContract.deserializeBinary, 'protocol.UnfreezeAssetContract'];
+ContractTable[ContractType.UPDATEASSETCONTRACT] = [UpdateAssetContract.deserializeBinary, 'protocol.UpdateAssetContract'];
+/* not defined right now
+  ContractTable[ContractType.CUSTOMCONTRACT] =                  [CustomContract.deserializeBinary,'protocol.CustomContract']
+*/
+
+const TransactionFields = {
+  decodeAddress(address) { return getBase58CheckAddress(base64DecodeFromString(address)); },
+  ownerAddress(address) { return this.decodeAddress(address); },
+  toAddress(address) { return this.decodeAddress(address); },
+  voteAddress(address) { return this.decodeAddress(address); },
+  assetName(token) { return bytesToString(Array.from(base64DecodeFromString(token))); },
+};
+
+function decodeTransactionFields(transaction) {
+  const transactionResult = transaction;
+  Object.keys(transactionResult).forEach((key) => {
+    if (Array.isArray(transactionResult[key])) {
+      transactionResult[key].forEach(decodeTransactionFields);
+    } else if (TransactionFields[key]) {
+      transactionResult[key] = TransactionFields[key](transactionResult[key]);
+    }
+  });
+  return transactionResult;
+}
+
+function deserializeTransaction(tx) {
+  try {
+    const contractList = tx.getRawData().getContractList();
+    const transactions = [];
+
+    contractList.forEach((contract) => {
+      const any = contract.getParameter();
+
+      const contractType = contract.getType();
+      let transaction = any.unpack(ContractTable[contractType][0], ContractTable[contractType][1]);
+      transaction = transaction.toObject();
+      transaction.contractType = contractType;
+      transaction.hash = byteArray2hexStr(SHA256(tx.getRawData().serializeBinary()));
+      transaction.time = tx.getRawData().getTimestamp();
+      transaction = decodeTransactionFields(transaction);
+      transactions.push(transaction);
+    });
+    return transactions;
+  } catch (err) {
+    return [null];
+  }
+}
+
+function deserializeTransactions(transactionsList = []) {
+  return transactionsList.map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
+}
 
 function encodeString(str) {
   return Uint8Array.from(base64DecodeFromString(btoa(str)));
 }
 
-//TODO find a better place.
+// TODO find a better place.
 function btoa(str) {
-  var buffer;
+  let buffer;
 
   if (str instanceof Buffer) {
     buffer = str;
@@ -51,7 +123,7 @@ function buildTransferContract(message, contractType, typeName) {
 
   const transaction = new Transaction();
   transaction.setRawData(raw);
-  
+
   return transaction;
 }
 
@@ -67,7 +139,7 @@ function buildTransferTransaction(from, to, amount) {
   transferContract.setToAddress(Uint8Array.from(decode58Check(to)));
   transferContract.setOwnerAddress(Uint8Array.from(decode58Check(from)));
   transferContract.setAmount(amount * 1000000);
-  
+
   const transaction = buildTransferContract(
     transferContract,
     Transaction.Contract.ContractType.TRANSFERCONTRACT,
@@ -151,7 +223,7 @@ function buildWitnessCreateTransaction(address, url) {
 function buildWitnessUpdateTransaction(address, url) {
   const contract = new WitnessUpdateContract();
   contract.setOwnerAddress(Uint8Array.from(decode58Check(address)));
-  
+
   contract.setUpdateUrl(encodeString(url));
 
   const transaction = buildTransferContract(
@@ -347,17 +419,16 @@ function buildUnfreezeAssetTransaction(address) {
  * @param {Block} block the block to ref the transaction (usually the current block)
  */
 function addBlockReferenceToTransaction(transaction, block) {
+  const blockHash = block.hash;
+  const blockNum = block.number;
 
-  let blockHash = block.hash;
-  let blockNum = block.number;
-
-  let numBytes = longToByteArray(blockNum);
+  const numBytes = longToByteArray(blockNum);
   numBytes.reverse();
-  let hashBytes = hexStr2byteArray(blockHash);
+  const hashBytes = hexStr2byteArray(blockHash);
 
-  let generateBlockId = [...numBytes.slice(0, 8), ...hashBytes.slice(8, hashBytes.length - 1)];
-  
-  let rawData = transaction.getRawData();
+  const generateBlockId = [...numBytes.slice(0, 8), ...hashBytes.slice(8, hashBytes.length - 1)];
+
+  const rawData = transaction.getRawData();
   rawData.setRefBlockHash(Uint8Array.from(generateBlockId.slice(8, 16)));
   rawData.setRefBlockBytes(Uint8Array.from(numBytes.slice(6, 8)));
   rawData.setExpiration(block.time + (60 * 5 * 1000));
@@ -405,4 +476,6 @@ module.exports = {
   buildUnfreezeAssetTransaction,
   addBlockReferenceToTransaction,
   signTransaction,
+  deserializeTransaction,
+  deserializeTransactions,
 };

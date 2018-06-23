@@ -5,7 +5,7 @@ const {
   getBase58CheckAddress, passwordToAddress, decode58Check,
 } = require('../utils/crypto');
 const { bytesToString } = require('../utils/bytes');
-const { deserializeTransaction } = require('../utils/serializer');
+const { deserializeTransaction } = require('../utils/transaction');
 const { Account } = require('../protocol/core/Tron_pb');
 const { WalletClient } = require('../protocol/api/api_grpc_pb');
 const caller = require('grpc-caller');
