@@ -10,6 +10,8 @@ const { Account } = require('../protocol/core/Tron_pb');
 const { WalletClient } = require('../protocol/api/api_grpc_pb');
 const caller = require('grpc-caller');
 const { stringToBytes, hexStr2byteArray } = require('../lib/code');
+const { SHA256 } = require('../utils/crypto');
+
 
 class GrpcClient {
   constructor(options) {
@@ -132,6 +134,7 @@ class GrpcClient {
     block.time = rawData.getTimestamp();
     block.witnessAddress = getBase58CheckAddress(Array.from(rawData.getWitnessAddress())),
     block.number = rawData.getNumber();
+    block.hash = byteArray2hexStr(SHA256(rawData.serializeBinary()));
     block.parentHash = byteArray2hexStr(rawData.getParenthash());
     delete block.blockHeader;
     return block;
@@ -153,6 +156,7 @@ class GrpcClient {
     lastBlock.time = rawData.getTimestamp();
     lastBlock.witnessAddress = getBase58CheckAddress(Array.from(rawData.getWitnessAddress())),
     lastBlock.number = rawData.getNumber();
+    lastBlock.hash = byteArray2hexStr(SHA256(rawData.serializeBinary()));
     lastBlock.parentHash = byteArray2hexStr(rawData.getParenthash());
     delete lastBlock.blockHeader;
     return lastBlock;
@@ -173,6 +177,11 @@ class GrpcClient {
   async getNextMaintenanceTime() {
     const nextMaintenanceTime = await this.api.getNextMaintenanceTime(new EmptyMessage());
     return nextMaintenanceTime.toObject();
+  }
+
+  async broadcastTransaction(transaction) {
+    const broadcastTransactionAnswer = await this.api.broadcastTransaction(transaction);
+    return broadcastTransactionAnswer.toObject();
   }
 }
 

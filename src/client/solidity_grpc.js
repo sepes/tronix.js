@@ -5,6 +5,7 @@ const {
   getBase58CheckAddress, passwordToAddress, decode58Check,
 } = require('../utils/crypto');
 const { byteArray2hexStr, bytesToString } = require('../utils/bytes');
+const { SHA256 } = require('../utils/crypto');
 const { deserializeTransactions } = require('../utils/serializer');
 const { Account } = require('../protocol/core/Tron_pb');
 const { WalletSolidityClient, WalletExtensionClient } = require('../protocol/api/api_grpc_pb');
@@ -102,6 +103,7 @@ class SolidityGrpcClient {
     block.time = rawData.getTimestamp();
     block.witnessAddress = getBase58CheckAddress(Array.from(rawData.getWitnessAddress())),
     block.number = rawData.getNumber();
+    block.hash = byteArray2hexStr(SHA256(rawData.serializeBinary()));
     block.parentHash = byteArray2hexStr(rawData.getParenthash());
     delete block.blockHeader;
     return block;
@@ -123,6 +125,7 @@ class SolidityGrpcClient {
     lastBlock.time = rawData.getTimestamp();
     lastBlock.witnessAddress = getBase58CheckAddress(Array.from(rawData.getWitnessAddress())),
     lastBlock.number = rawData.getNumber();
+    lastBlock.hash = byteArray2hexStr(SHA256(rawData.serializeBinary()));
     lastBlock.parentHash = byteArray2hexStr(rawData.getParenthash());
     delete lastBlock.blockHeader;
     return lastBlock;

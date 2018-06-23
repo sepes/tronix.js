@@ -8,34 +8,6 @@ const jsSHA = require('../lib/sha256');
 const ADDRESS_SIZE = require('./address').ADDRESS_SIZE;
 const { byte2hexStr, byteArray2hexStr } = require('./bytes');
 
-/**
- * Sign A Transaction by priKey.
- * signature is 65 bytes, r[32] || s[32] || id[1](<27)
- * @returns  a Transaction object signed
- * @param priKeyBytes: privateKey for ECC
- * @param transaction: a Transaction object unSigned
- */
-function signTransaction(priKeyBytes, transaction) {
-  if (typeof priKeyBytes === 'string') {
-    priKeyBytes = hexStr2byteArray(priKeyBytes);
-  }
-
-  const raw = transaction.getRawData();
-  const rawBytes = raw.serializeBinary();
-  const hashBytes = SHA256(rawBytes);
-  const signBytes = ECKeySign(hashBytes, priKeyBytes);
-  const uint8Array = new Uint8Array(signBytes);
-  const count = raw.getContractList().length;
-  for (let i = 0; i < count; i++) {
-    transaction.addSignature(uint8Array);
-  }
-
-  return {
-    transaction,
-    hex: byteArray2hexStr(transaction.serializeBinary()),
-  };
-}
-
 function arrayToBase64String(a) {
   return btoa(String.fromCharCode(...a));
 }
@@ -243,7 +215,6 @@ function pkToAddress(privateKey) {
 }
 
 module.exports = {
-  signTransaction,
   passwordToAddress,
   genPriKey,
   getAddressFromPriKey,
@@ -255,4 +226,5 @@ module.exports = {
   decode58Check,
   signBytes,
   SHA256,
+  ECKeySign,
 };
