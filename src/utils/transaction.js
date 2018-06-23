@@ -24,6 +24,19 @@ function encodeString(str) {
   return Uint8Array.from(base64DecodeFromString(btoa(str)));
 }
 
+//TODO find a better place.
+function btoa(str) {
+  var buffer;
+
+  if (str instanceof Buffer) {
+    buffer = str;
+  } else {
+    buffer = new Buffer(str.toString(), 'binary');
+  }
+
+  return buffer.toString('base64');
+}
+
 function buildTransferContract(message, contractType, typeName) {
   const anyValue = new google_protobuf_any_pb.Any();
   anyValue.pack(message.serializeBinary(), `protocol.${typeName}`);
@@ -46,14 +59,14 @@ function buildTransferContract(message, contractType, typeName) {
  * Build trx transfer transaction
  * @param {string} from address in base 58
  * @param {string} to address in base 58
- * @param {number} amount amount in suns //TODO check if TRX?
+ * @param {number} amount amount in TRX?
  *
  */
 function buildTransferTransaction(from, to, amount) {
   const transferContract = new TransferContract();
   transferContract.setToAddress(Uint8Array.from(decode58Check(to)));
   transferContract.setOwnerAddress(Uint8Array.from(decode58Check(from)));
-  transferContract.setAmount(amount);
+  transferContract.setAmount(amount * 1000000);
   
   const transaction = buildTransferContract(
     transferContract,
