@@ -4,11 +4,11 @@ const {
 const {
   getBase58CheckAddress, passwordToAddress, decode58Check,
 } = require('../utils/crypto');
-const { byteArray2hexStr, bytesToString } = require('../utils/bytes');
-const { SHA256 } = require('../utils/crypto');
+const { bytesToString } = require('../utils/bytes');
 const { deserializeTransactions } = require('../utils/serializer');
 const { Account } = require('../protocol/core/Tron_pb');
 const { WalletSolidityClient, WalletExtensionClient } = require('../protocol/api/api_grpc_pb');
+const { deserializeBlock } = require('../utils/block');
 const caller = require('grpc-caller');
 
 class SolidityGrpcClient {
@@ -94,19 +94,7 @@ class SolidityGrpcClient {
     const message = new NumberMessage();
     message.setNum(number);
     const blockRaw = await this.api.getBlockByNum(message);
-    const block = blockRaw.toObject();
-    const rawData = blockRaw.getBlockHeader().getRawData();
-    block.transactionsList = deserializeTransactions(blockRaw.getTransactionsList());
-    block.transactionsCount = block.transactionsList.length;
-    block.totalTrx = block.transactionsList.reduce((t, n) => t + ((n && n.amount) ? n.amount : 0), 0);
-    block.size = blockRaw.serializeBinary().length;
-    block.time = rawData.getTimestamp();
-    block.witnessAddress = getBase58CheckAddress(Array.from(rawData.getWitnessAddress())),
-    block.number = rawData.getNumber();
-    block.hash = byteArray2hexStr(SHA256(rawData.serializeBinary()));
-    block.parentHash = byteArray2hexStr(rawData.getParenthash());
-    delete block.blockHeader;
-    return block;
+    return deserializeBlock(blockRaw);
   }
 
   /**
@@ -116,19 +104,7 @@ class SolidityGrpcClient {
    */
   async getLatestBlock() {
     const lastBlockRaw = await this.api.getNowBlock(new EmptyMessage());
-    const lastBlock = lastBlockRaw.toObject();
-    const rawData = lastBlockRaw.getBlockHeader().getRawData();
-    lastBlock.transactionsList = deserializeTransactions(lastBlockRaw.getTransactionsList());
-    lastBlock.transactionsCount = lastBlock.transactionsList.length;
-    lastBlock.totalTrx = lastBlock.transactionsList.reduce((t, n) => t + ((n && n.amount) ? n.amount : 0), 0);
-    lastBlock.size = rawData.serializeBinary().length;
-    lastBlock.time = rawData.getTimestamp();
-    lastBlock.witnessAddress = getBase58CheckAddress(Array.from(rawData.getWitnessAddress())),
-    lastBlock.number = rawData.getNumber();
-    lastBlock.hash = byteArray2hexStr(SHA256(rawData.serializeBinary()));
-    lastBlock.parentHash = byteArray2hexStr(rawData.getParenthash());
-    delete lastBlock.blockHeader;
-    return lastBlock;
+    return deserializeBlock(lastBlockRaw);
   }
 
   async getTransactionsToThis(address, limit = 1000, offset = 0) {
