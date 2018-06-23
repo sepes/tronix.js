@@ -1,4 +1,7 @@
-const { decode58Check } = require('./crypto');
+const { decode58Check, SHA256, ECKeySign } = require('./crypto');
+const { longToByteArray } = require('./bytes');
+const { hexStr2byteArray } = require('../lib/code');
+
 const { Transaction } = require('../protocol/core/Tron_pb');
 const google_protobuf_any_pb = require('google-protobuf/google/protobuf/any_pb.js');
 const { base64DecodeFromString } = require('../lib/code');
@@ -35,86 +38,144 @@ function buildTransferContract(message, contractType, typeName) {
 
   const transaction = new Transaction();
   transaction.setRawData(raw);
+  
+  return transaction;
+}
+
+/**
+ * Build trx transfer transaction
+ * @param {string} from address in base 58
+ * @param {string} to address in base 58
+ * @param {number} amount amount in suns //TODO check if TRX?
+ *
+ */
+function buildTransferTransaction(from, to, amount) {
+  const transferContract = new TransferContract();
+  transferContract.setToAddress(Uint8Array.from(decode58Check(to)));
+  transferContract.setOwnerAddress(Uint8Array.from(decode58Check(from)));
+  transferContract.setAmount(amount);
+  
+  const transaction = buildTransferContract(
+    transferContract,
+    Transaction.Contract.ContractType.TRANSFERCONTRACT,
+    'TransferContract',
+  );
 
   return transaction;
 }
 
-function buildTransferTransaction(token, from, to, amount) {
-  if (token.toUpperCase() === 'TRX') {
-    const transferContract = new TransferContract();
-    transferContract.setToAddress(Uint8Array.from(decode58Check(to)));
-    transferContract.setOwnerAddress(Uint8Array.from(decode58Check(from)));
-    transferContract.setAmount(amount);
-
-    return buildTransferContract(
-      transferContract,
-      Transaction.Contract.ContractType.TRANSFERCONTRACT,
-      'TransferContract',
-    );
-  }
-
+/**
+ * Build token transfer transaction
+ * @param {string} token token name
+ * @param {string} from address in base 58
+ * @param {string} to address in base 58
+ * @param {number} amount amount in suns //TODO check if TRX?
+ *
+ */
+function buildTransferAssetTransaction(token, from, to, amount) {
   const transferContract = new TransferAssetContract();
   transferContract.setToAddress(Uint8Array.from(decode58Check(to)));
   transferContract.setOwnerAddress(Uint8Array.from(decode58Check(from)));
   transferContract.setAmount(amount);
   transferContract.setAssetName(encodeString(token));
 
-  return buildTransferContract(
+  const transaction = buildTransferContract(
     transferContract,
     Transaction.Contract.ContractType.TRANSFERASSETCONTRACT,
     'TransferAssetContract',
   );
+
+  return transaction;
 }
 
-function buildAccountUpdate(address, name) {
+/**
+ * Update account transaction (you can just update with your name 1 time)
+ * @param {string} address address in base 58
+ * @param {string} name name string //TODO check the limit
+ *
+ */
+function buildAccountUpdateTransaction(address, name) {
   const contract = new AccountUpdateContract();
   contract.setOwnerAddress(Uint8Array.from(decode58Check(address)));
   contract.setAccountName(encodeString(name));
 
-  return buildTransferContract(
+  const transaction = buildTransferContract(
     contract,
     Transaction.Contract.ContractType.ACCOUNTUPDATECONTRACT,
     'AccountUpdateContract',
   );
+
+  return transaction;
 }
 
-function buildWitnessCreate(address, url) {
+
+/**
+ * Create witness transaction
+ * @param {string} address address in base 58
+ * @param {string} url url for witness //Check the limit
+ *
+ */
+function buildWitnessCreateTransaction(address, url) {
   const contract = new WitnessCreateContract();
   contract.setOwnerAddress(Uint8Array.from(decode58Check(address)));
   contract.setUrl(encodeString(url));
 
-  return buildTransferContract(
+  const transaction = buildTransferContract(
     contract,
     Transaction.Contract.ContractType.WITNESSCREATECONTRACT,
     'WitnessCreateContract',
   );
+
+  return transaction;
 }
 
-function buildWitnessUpdate(address, url) {
+/**
+ * Update witness transaction
+ * @param {string} address address in base 58
+ * @param {string} url url for witness //Check the limit
+ *
+ */
+function buildWitnessUpdateTransaction(address, url) {
   const contract = new WitnessUpdateContract();
   contract.setOwnerAddress(Uint8Array.from(decode58Check(address)));
-  console.log('SET RURL', url);
+  
   contract.setUpdateUrl(encodeString(url));
 
-  return buildTransferContract(
+  const transaction = buildTransferContract(
     contract,
     Transaction.Contract.ContractType.WITNESSUPDATECONTRACT,
     'WitnessUpdateContract',
   );
+
+  return transaction;
 }
 
-function buildWithdrawBalance(address) {
+
+/**
+ * Widthdraw balance transaction (for block creation rewards)
+ * @param {string} address address in base 58
+ *
+ */
+function buildWithdrawBalanceTransaction(address) {
   const contract = new WithdrawBalanceContract();
   contract.setOwnerAddress(Uint8Array.from(decode58Check(address)));
 
-  return buildTransferContract(
+  const transaction = buildTransferContract(
     contract,
     Transaction.Contract.ContractType.WITHDRAWBALANCECONTRACT,
     'WithdrawBalanceContract',
   );
+
+  return transaction;
 }
 
-function buildVote(address, votes) {
+/**
+ * Votes transaction
+ * @param {string} address address in base 58
+ * @param {array} votes list of votes of quantity +
+ *
+ */
+function buildVoteTransaction(address, votes) {
   const contract = new VoteWitnessContract();
   contract.setOwnerAddress(Uint8Array.from(decode58Check(address)));
 
@@ -129,15 +190,23 @@ function buildVote(address, votes) {
     contract.addVotes(vote);
   }
 
-  return buildTransferContract(
+  const transaction = buildTransferContract(
     contract,
     Transaction.Contract.ContractType.VOTEWITNESSCONTRACT,
     'VoteWitnessContract',
   );
+
+  return transaction;
 }
 
-
-function buildAssetParticipate(address, issuerAddress, token, amount) {
+/**
+ * Asset participate issue transaction
+ * @param {string} address address in base 58
+ * @param {array} issuerAddress issuer address in base 58
+ * @param {string} token token name //check the chars limit
+ *
+ */
+function buildAssetParticipateTransaction(address, issuerAddress, token, amount) {
   const contract = new ParticipateAssetIssueContract();
 
   contract.setToAddress(Uint8Array.from(decode58Check(issuerAddress)));
@@ -145,14 +214,22 @@ function buildAssetParticipate(address, issuerAddress, token, amount) {
   contract.setAssetName(encodeString(token));
   contract.setAmount(amount);
 
-  return buildTransferContract(
+  const transaction = buildTransferContract(
     contract,
     Transaction.Contract.ContractType.PARTICIPATEASSETISSUECONTRACT,
     'ParticipateAssetIssueContract',
   );
+
+  return transaction;
 }
 
-function buildAssetIssue(options) {
+
+/**
+ * Asset issue transaction
+ * @param {object} options options list
+ *
+ */
+function buildAssetIssueTransaction(options) {
   const contract = new AssetIssueContract();
   contract.setOwnerAddress(Uint8Array.from(decode58Check(options.address)));
   contract.setName(encodeString(options.name));
@@ -177,11 +254,13 @@ function buildAssetIssue(options) {
     }
   }
 
-  return buildTransferContract(
+  const transaction = buildTransferContract(
     contract,
     Transaction.Contract.ContractType.ASSETISSUECONTRACT,
     'AssetIssueContract',
   );
+
+  return transaction;
 }
 
 /**
@@ -190,65 +269,127 @@ function buildAssetIssue(options) {
  * @param address From which address to freze
  * @param amount The amount of TRX to freeze
  * @param duration Duration in days
+ *
  */
-function buildFreezeBalance(address, amount, duration) {
+function buildFreezeBalanceTransaction(address, amount, duration) {
   const contract = new FreezeBalanceContract();
 
   contract.setOwnerAddress(Uint8Array.from(decode58Check(address)));
   contract.setFrozenBalance(amount);
   contract.setFrozenDuration(duration);
 
-  return buildTransferContract(
+  const transaction = buildTransferContract(
     contract,
     Transaction.Contract.ContractType.FREEZEBALANCECONTRACT,
     'FreezeBalanceContract',
   );
+
+  return transaction;
 }
 
 /**
  * Unfreeze balance
  *
  * @param address From which address to freeze
+ *
  */
-function buildUnfreezeBalance(address) {
+function buildUnfreezeBalanceTransaction(address) {
   const contract = new UnfreezeBalanceContract();
 
   contract.setOwnerAddress(Uint8Array.from(decode58Check(address)));
 
-  return buildTransferContract(
+  const transaction = buildTransferContract(
     contract,
     Transaction.Contract.ContractType.UNFREEZEBALANCECONTRACT,
     'UnfreezeBalanceContract',
   );
+
+  return transaction;
 }
 
 /**
  * Unfreeze Assets
  *
  * @param address From which address to unfreeze
+ *
  */
-function buildUnfreezeAsset(address) {
+function buildUnfreezeAssetTransaction(address) {
   const contract = new UnfreezeAssetContract();
 
   contract.setOwnerAddress(Uint8Array.from(decode58Check(address)));
 
-  return buildTransferContract(
+  const transaction = buildTransferContract(
     contract,
     Transaction.Contract.ContractType.UNFREEZEASSETCONTRACT,
     'UnfreezeAssetContract',
   );
+
+  return transaction;
+}
+
+/**
+ * Add block reference to transaction
+ * This is a needed step after building the transaction before signing the transaction it to the network.
+ * @param {Transaction} transaction a builded non-signed transaction
+ * @param {Block} block the block to ref the transaction (usually the current block)
+ */
+function addBlockReferenceToTransaction(transaction, block) {
+
+  let blockHash = block.hash;
+  let blockNum = block.number;
+
+  let numBytes = longToByteArray(blockNum);
+  numBytes.reverse();
+  let hashBytes = hexStr2byteArray(blockHash);
+
+  let generateBlockId = [...numBytes.slice(0, 8), ...hashBytes.slice(8, hashBytes.length - 1)];
+  
+  let rawData = transaction.getRawData();
+  rawData.setRefBlockHash(Uint8Array.from(generateBlockId.slice(8, 16)));
+  rawData.setRefBlockBytes(Uint8Array.from(numBytes.slice(6, 8)));
+  rawData.setExpiration(block.time + (60 * 5 * 1000));
+
+  return transaction;
+}
+
+/**
+ * Sign A Transaction by priKey.
+ * signature is 65 bytes, r[32] || s[32] || id[1](<27)
+ * @returns  a Transaction object signed
+ * @param transaction: a Transaction object unSigned
+ * @param priKeyBytes: privateKey for ECC
+ */
+function signTransaction(transaction, priKeyBytes) {
+  if (typeof priKeyBytes === 'string') {
+    priKeyBytes = hexStr2byteArray(priKeyBytes);
+  }
+
+  const raw = transaction.getRawData();
+  const rawBytes = raw.serializeBinary();
+  const hashBytes = SHA256(rawBytes);
+  const signBytes = ECKeySign(hashBytes, priKeyBytes);
+  const uint8Array = new Uint8Array(signBytes);
+  const count = raw.getContractList().length;
+  for (let i = 0; i < count; i++) {
+    transaction.addSignature(uint8Array);
+  }
+
+  return transaction;
 }
 
 module.exports = {
   buildTransferTransaction,
-  buildAccountUpdate,
-  buildAssetParticipate,
-  buildVote,
-  buildFreezeBalance,
-  buildUnfreezeBalance,
-  buildAssetIssue,
-  buildWitnessUpdate,
-  buildWithdrawBalance,
-  buildWitnessCreate,
-  buildUnfreezeAsset,
+  buildTransferAssetTransaction,
+  buildAccountUpdateTransaction,
+  buildAssetParticipateTransaction,
+  buildVoteTransaction,
+  buildFreezeBalanceTransaction,
+  buildUnfreezeBalanceTransaction,
+  buildAssetIssueTransaction,
+  buildWitnessUpdateTransaction,
+  buildWithdrawBalanceTransaction,
+  buildWitnessCreateTransaction,
+  buildUnfreezeAssetTransaction,
+  addBlockReferenceToTransaction,
+  signTransaction,
 };
