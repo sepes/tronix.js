@@ -9,7 +9,7 @@ const { deserializeTransaction, deserializeTransactions } = require('../utils/se
 const { Account } = require('../protocol/core/Tron_pb');
 const { WalletClient } = require('../protocol/api/api_grpc_pb');
 const caller = require('grpc-caller');
-const { stringToBytes, hexStr2byteArray } = require('../lib/code');
+const { stringToBytes, hexStr2byteArray, base64DecodeFromString } = require('../lib/code');
 const { SHA256 } = require('../utils/crypto');
 
 
@@ -181,8 +181,8 @@ class GrpcClient {
 
   async broadcastTransaction(transaction) {
     let broadcastTransactionAnswer = await this.api.broadcastTransaction(transaction);
-    //TODO decode result message like this one
     broadcastTransactionAnswer = broadcastTransactionAnswer.toObject();
+    broadcastTransactionAnswer.message = bytesToString(Array.from(base64DecodeFromString(broadcastTransactionAnswer.message)));
     return broadcastTransactionAnswer;
   }
 }
