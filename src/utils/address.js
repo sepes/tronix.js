@@ -1,4 +1,5 @@
-const ADDRESS_PREFIX = 'a0';
+const ADDRESS_PREFIX_TEST = 'a0';
+const ADDRESS_PREFIX = '41';
 const ADDRESS_SIZE = 42;
 
 
@@ -11,7 +12,8 @@ function isAddressValid(address) {
     return false;
   }
 
-  if (address.substr(0, 2).toUpperCase() !== ADDRESS_PREFIX.toUpperCase()) {
+  const prefixRegex = new RegExp(`^(${ADDRESS_PREFIX}|${ADDRESS_PREFIX_TEST})`);
+  if (prefixRegex.test(address.substr(0, 2).toUpperCase())) {
     return false;
   }
 
