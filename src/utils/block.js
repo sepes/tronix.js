@@ -16,7 +16,7 @@ const deserializeBlock = (blockRaw) => {
     witnessAddress: getBase58CheckAddress(base64DecodeFromString(blockObj.blockHeader.rawData.witnessAddress)),
     number: blockObj.blockHeader.rawData.number,
     parentHash: byteArray2hexStr(blockRaw.getBlockHeader().getRawData().getParenthash()),
-    hash: byteArray2hexStr(SHA256(blockRaw.serializeBinary())),
+    hash: byteArray2hexStr(SHA256(blockRaw.getBlockHeader().getRawData().serializeBinary())),
   };
 };
 
