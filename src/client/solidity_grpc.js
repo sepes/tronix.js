@@ -5,10 +5,11 @@ const {
   getBase58CheckAddress, passwordToAddress, decode58Check,
 } = require('../utils/crypto');
 const { bytesToString } = require('../utils/bytes');
-const { deserializeTransactions } = require('../utils/serializer');
+const { deserializeTransactions } = require('../utils/transaction');
 const { Account } = require('../protocol/core/Tron_pb');
 const { WalletSolidityClient, WalletExtensionClient } = require('../protocol/api/api_grpc_pb');
 const { deserializeBlock } = require('../utils/block');
+const { deserializeAssets } = require('../utils/asset');
 const caller = require('grpc-caller');
 
 class SolidityGrpcClient {
@@ -24,22 +25,8 @@ class SolidityGrpcClient {
   }
 
   async getAssetIssueList() {
-    const assetsListRaw = await this.api.getAssetIssueList(new EmptyMessage())
-      .then(x => x.getAssetissueList());
-    const assetsList = assetsListRaw.map(ai => ({
-      ownerAddress: getBase58CheckAddress(Array.from(ai.getOwnerAddress())),
-      url: bytesToString(ai.getUrl()),
-      name: bytesToString(ai.getName()),
-      description: bytesToString(ai.getDescription()),
-      startTime: ai.getStartTime(),
-      endTime: ai.getEndTime(),
-      voteScore: ai.getVoteScore(),
-      totalSupply: ai.getTotalSupply(),
-      trxNum: ai.getTrxNum() / 1000,
-      num: ai.getNum(),
-      abbr: bytesToString(ai.getAbbr()),
-    }));
-    return assetsList;
+    const assetsListRaw = await this.api.getAssetIssueList(new EmptyMessage());
+    return deserializeAssets(assetsListRaw);
   }
 
   /**

@@ -1,6 +1,6 @@
 
-const { deserializeTransactions } = require('../utils/serializer');
-const { getBase58CheckAddress } = require('../utils/crypto');
+const { deserializeTransactions } = require('../utils/transaction');
+const { getBase58CheckAddress, SHA256 } = require('../utils/crypto');
 const { byteArray2hexStr } = require('../utils/bytes');
 const { base64DecodeFromString } = require('../lib/code');
 
@@ -16,6 +16,7 @@ const deserializeBlock = (blockRaw) => {
     witnessAddress: getBase58CheckAddress(base64DecodeFromString(blockObj.blockHeader.rawData.witnessAddress)),
     number: blockObj.blockHeader.rawData.number,
     parentHash: byteArray2hexStr(blockRaw.getBlockHeader().getRawData().getParenthash()),
+    hash: byteArray2hexStr(SHA256(blockRaw.serializeBinary())),
   };
 };
 

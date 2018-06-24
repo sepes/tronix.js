@@ -5,13 +5,13 @@ const {
   getBase58CheckAddress, passwordToAddress, decode58Check,
 } = require('../utils/crypto');
 const { bytesToString } = require('../utils/bytes');
-const { deserializeTransaction } = require('../utils/serializer');
+const { deserializeTransaction } = require('../utils/transaction');
 const { Account } = require('../protocol/core/Tron_pb');
 const { WalletClient } = require('../protocol/api/api_grpc_pb');
 const caller = require('grpc-caller');
 const { stringToBytes, hexStr2byteArray, base64DecodeFromString } = require('../lib/code');
-const { SHA256 } = require('../utils/crypto');
 const { deserializeBlock, deserializeBlocks } = require('../utils/block');
+const { deserializeAsset, deserializeAssets } = require('../utils/asset');
 
 class GrpcClient {
   constructor(options) {
@@ -50,42 +50,15 @@ class GrpcClient {
   }
 
   async getAssetIssueList() {
-    const assetsListRaw = await this.api.getAssetIssueList(new EmptyMessage())
-      .then(x => x.getAssetissueList());
-    return assetsListRaw.map(ai => ({
-      ownerAddress: getBase58CheckAddress(Array.from(ai.getOwnerAddress())),
-      url: bytesToString(ai.getUrl()),
-      name: bytesToString(ai.getName()),
-      description: bytesToString(ai.getDescription()),
-      startTime: ai.getStartTime(),
-      endTime: ai.getEndTime(),
-      voteScore: ai.getVoteScore(),
-      totalSupply: ai.getTotalSupply(),
-      trxNum: ai.getTrxNum() / 1000,
-      num: ai.getNum(),
-      abbr: bytesToString(ai.getAbbr()),
-    }));
+    const assetsListRaw = await this.api.getAssetIssueList(new EmptyMessage());
+    return deserializeAssets(assetsListRaw);
   }
 
   async getAssetIssueByName(assetName) {
     const assetByte = new BytesMessage();
     assetByte.setValue(new Uint8Array(stringToBytes(assetName)));
-
     const assetIssue = await this.api.getAssetIssueByName(assetByte);
-    return {
-      ownerAddress: getBase58CheckAddress(Array.from(assetIssue.getOwnerAddress())),
-      url: bytesToString(assetIssue.getUrl()),
-      name: bytesToString(assetIssue.getName()),
-      description: bytesToString(assetIssue.getDescription()),
-      startTime: assetIssue.getStartTime(),
-      endTime: assetIssue.getEndTime(),
-      voteScore: assetIssue.getVoteScore(),
-      totalSupply: assetIssue.getTotalSupply(),
-      trxNum: assetIssue.getTrxNum() / 1000,
-      num: assetIssue.getNum(),
-      frozenSupplyList: assetIssue.getFrozenSupplyList(),
-      abbr: bytesToString(assetIssue.getAbbr()),
-    };
+    return deserializeAsset(assetIssue);
   }
 
   /**
