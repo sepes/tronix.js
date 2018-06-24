@@ -150,6 +150,28 @@ function deserialize_protocol_DynamicProperties(buffer_arg) {
   return core_Tron_pb.DynamicProperties.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_protocol_EasyTransferMessage(arg) {
+  if (!(arg instanceof api_api_pb.EasyTransferMessage)) {
+    throw new Error('Expected argument of type protocol.EasyTransferMessage');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_protocol_EasyTransferMessage(buffer_arg) {
+  return api_api_pb.EasyTransferMessage.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_protocol_EasyTransferResponse(arg) {
+  if (!(arg instanceof api_api_pb.EasyTransferResponse)) {
+    throw new Error('Expected argument of type protocol.EasyTransferResponse');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_protocol_EasyTransferResponse(buffer_arg) {
+  return api_api_pb.EasyTransferResponse.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_protocol_EmptyMessage(arg) {
   if (!(arg instanceof api_api_pb.EmptyMessage)) {
     throw new Error('Expected argument of type protocol.EmptyMessage');
@@ -194,6 +216,17 @@ function deserialize_protocol_NumberMessage(buffer_arg) {
   return api_api_pb.NumberMessage.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_protocol_PaginatedMessage(arg) {
+  if (!(arg instanceof api_api_pb.PaginatedMessage)) {
+    throw new Error('Expected argument of type protocol.PaginatedMessage');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_protocol_PaginatedMessage(buffer_arg) {
+  return api_api_pb.PaginatedMessage.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_protocol_ParticipateAssetIssueContract(arg) {
   if (!(arg instanceof core_Contract_pb.ParticipateAssetIssueContract)) {
     throw new Error('Expected argument of type protocol.ParticipateAssetIssueContract');
@@ -227,6 +260,17 @@ function deserialize_protocol_Transaction(buffer_arg) {
   return core_Tron_pb.Transaction.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_protocol_TransactionInfo(arg) {
+  if (!(arg instanceof core_Tron_pb.TransactionInfo)) {
+    throw new Error('Expected argument of type protocol.TransactionInfo');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_protocol_TransactionInfo(buffer_arg) {
+  return core_Tron_pb.TransactionInfo.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_protocol_TransactionList(arg) {
   if (!(arg instanceof api_api_pb.TransactionList)) {
     throw new Error('Expected argument of type protocol.TransactionList');
@@ -236,6 +280,17 @@ function serialize_protocol_TransactionList(arg) {
 
 function deserialize_protocol_TransactionList(buffer_arg) {
   return api_api_pb.TransactionList.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_protocol_TransactionSign(arg) {
+  if (!(arg instanceof core_Tron_pb.TransactionSign)) {
+    throw new Error('Expected argument of type protocol.TransactionSign');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_protocol_TransactionSign(buffer_arg) {
+  return core_Tron_pb.TransactionSign.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 function serialize_protocol_TransferAssetContract(arg) {
@@ -658,6 +713,17 @@ var WalletService = exports.WalletService = {
     responseSerialize: serialize_protocol_AssetIssueList,
     responseDeserialize: deserialize_protocol_AssetIssueList,
   },
+  getPaginatedAssetIssueList: {
+    path: '/protocol.Wallet/GetPaginatedAssetIssueList',
+    requestStream: false,
+    responseStream: false,
+    requestType: api_api_pb.PaginatedMessage,
+    responseType: api_api_pb.AssetIssueList,
+    requestSerialize: serialize_protocol_PaginatedMessage,
+    requestDeserialize: deserialize_protocol_PaginatedMessage,
+    responseSerialize: serialize_protocol_AssetIssueList,
+    responseDeserialize: deserialize_protocol_AssetIssueList,
+  },
   totalTransaction: {
     path: '/protocol.Wallet/TotalTransaction',
     requestStream: false,
@@ -679,6 +745,42 @@ var WalletService = exports.WalletService = {
     requestDeserialize: deserialize_protocol_EmptyMessage,
     responseSerialize: serialize_protocol_NumberMessage,
     responseDeserialize: deserialize_protocol_NumberMessage,
+  },
+  // Warning: do not invoke this interface provided by others.
+  getTransactionSign: {
+    path: '/protocol.Wallet/GetTransactionSign',
+    requestStream: false,
+    responseStream: false,
+    requestType: core_Tron_pb.TransactionSign,
+    responseType: core_Tron_pb.Transaction,
+    requestSerialize: serialize_protocol_TransactionSign,
+    requestDeserialize: deserialize_protocol_TransactionSign,
+    responseSerialize: serialize_protocol_Transaction,
+    responseDeserialize: deserialize_protocol_Transaction,
+  },
+  // Warning: do not invoke this interface provided by others.
+  createAdresss: {
+    path: '/protocol.Wallet/CreateAdresss',
+    requestStream: false,
+    responseStream: false,
+    requestType: api_api_pb.BytesMessage,
+    responseType: api_api_pb.BytesMessage,
+    requestSerialize: serialize_protocol_BytesMessage,
+    requestDeserialize: deserialize_protocol_BytesMessage,
+    responseSerialize: serialize_protocol_BytesMessage,
+    responseDeserialize: deserialize_protocol_BytesMessage,
+  },
+  // Warning: do not invoke this interface provided by others.
+  easyTransfer: {
+    path: '/protocol.Wallet/EasyTransfer',
+    requestStream: false,
+    responseStream: false,
+    requestType: api_api_pb.EasyTransferMessage,
+    responseType: api_api_pb.EasyTransferResponse,
+    requestSerialize: serialize_protocol_EasyTransferMessage,
+    requestDeserialize: deserialize_protocol_EasyTransferMessage,
+    responseSerialize: serialize_protocol_EasyTransferResponse,
+    responseDeserialize: deserialize_protocol_EasyTransferResponse,
   },
 };
 
@@ -717,6 +819,17 @@ var WalletSolidityService = exports.WalletSolidityService = {
     responseSerialize: serialize_protocol_AssetIssueList,
     responseDeserialize: deserialize_protocol_AssetIssueList,
   },
+  getPaginatedAssetIssueList: {
+    path: '/protocol.WalletSolidity/GetPaginatedAssetIssueList',
+    requestStream: false,
+    responseStream: false,
+    requestType: api_api_pb.PaginatedMessage,
+    responseType: api_api_pb.AssetIssueList,
+    requestSerialize: serialize_protocol_PaginatedMessage,
+    requestDeserialize: deserialize_protocol_PaginatedMessage,
+    responseSerialize: serialize_protocol_AssetIssueList,
+    responseDeserialize: deserialize_protocol_AssetIssueList,
+  },
   getNowBlock: {
     path: '/protocol.WalletSolidity/GetNowBlock',
     requestStream: false,
@@ -738,6 +851,28 @@ var WalletSolidityService = exports.WalletSolidityService = {
     requestDeserialize: deserialize_protocol_NumberMessage,
     responseSerialize: serialize_protocol_Block,
     responseDeserialize: deserialize_protocol_Block,
+  },
+  getTransactionById: {
+    path: '/protocol.WalletSolidity/GetTransactionById',
+    requestStream: false,
+    responseStream: false,
+    requestType: api_api_pb.BytesMessage,
+    responseType: core_Tron_pb.Transaction,
+    requestSerialize: serialize_protocol_BytesMessage,
+    requestDeserialize: deserialize_protocol_BytesMessage,
+    responseSerialize: serialize_protocol_Transaction,
+    responseDeserialize: deserialize_protocol_Transaction,
+  },
+  getTransactionInfoById: {
+    path: '/protocol.WalletSolidity/GetTransactionInfoById',
+    requestStream: false,
+    responseStream: false,
+    requestType: api_api_pb.BytesMessage,
+    responseType: core_Tron_pb.TransactionInfo,
+    requestSerialize: serialize_protocol_BytesMessage,
+    requestDeserialize: deserialize_protocol_BytesMessage,
+    responseSerialize: serialize_protocol_TransactionInfo,
+    responseDeserialize: deserialize_protocol_TransactionInfo,
   },
 };
 

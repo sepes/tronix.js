@@ -1,6 +1,6 @@
 const caller = require('grpc-caller');
 const {
-  EmptyMessage, NumberMessage, AccountPaginated,
+  EmptyMessage, BytesMessage, NumberMessage, AccountPaginated,
 } = require('../protocol/api/api_pb');
 const { decode58Check } = require('../utils/crypto');
 const { Account } = require('../protocol/core/Tron_pb');
@@ -72,6 +72,14 @@ class SolidityGrpcClient {
   async getLatestBlock() {
     const lastBlockRaw = await this.api.getNowBlock(new EmptyMessage());
     return deserializeBlock(lastBlockRaw);
+  }
+
+
+  async getTransactionById(txHash) {
+    const txByte = new BytesMessage();
+    txByte.setValue(new Uint8Array(hexStr2byteArray(txHash.toUpperCase())));
+    const transaction = await this.api.getTransactionById(txByte);
+    return deserializeTransaction(transaction)[0];
   }
 
   async getTransactionsToThis(address, limit = 1000, offset = 0) {
