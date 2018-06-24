@@ -1,17 +1,15 @@
+const caller = require('grpc-caller');
 const {
   EmptyMessage, BytesMessage, NumberMessage, AccountPaginated,
 } = require('../protocol/api/api_pb');
-const {
-  getBase58CheckAddress, passwordToAddress, decode58Check,
-} = require('../utils/crypto');
-const { bytesToString } = require('../utils/bytes');
-const { stringToBytes, hexStr2byteArray, base64DecodeFromString } = require('../lib/code');
-const { deserializeTransaction, deserializeTransactions } = require('../utils/transaction');
+const { decode58Check } = require('../utils/crypto');
 const { Account } = require('../protocol/core/Tron_pb');
 const { WalletSolidityClient, WalletExtensionClient } = require('../protocol/api/api_grpc_pb');
 const { deserializeBlock } = require('../utils/block');
 const { deserializeAssets } = require('../utils/asset');
-const caller = require('grpc-caller');
+const { deserializeAccount } = require('../utils/account');
+const { deserializeWitnesses } = require('../utils/witness');
+const { deserializeTransactions } = require('../utils/transaction');
 
 class SolidityGrpcClient {
   constructor(options) {
@@ -36,13 +34,8 @@ class SolidityGrpcClient {
    * @returns {Promise<*>}
    */
   async getWitnesses() {
-    const witnesses = await this.api.listWitnesses(new EmptyMessage())
-      .then(x => x.getWitnessesList());
-    return witnesses.map((w) => {
-      const witness = w.toObject();
-      witness.address = getBase58CheckAddress(Array.from(w.getAddress()));
-      return witness;
-    });
+    const witnesses = await this.api.listWitnesses(new EmptyMessage());
+    return deserializeWitnesses(witnesses);
   }
 
   /**
@@ -55,21 +48,7 @@ class SolidityGrpcClient {
     const accountArg = new Account();
     accountArg.setAddress(new Uint8Array(decode58Check(address)));
     const accountRaw = await this.api.getAccount(accountArg);
-    const account = accountRaw.toObject();
-    if (account.accountName.length > 0) {
-      account.accountName = bytesToString(Array.from(accountRaw.getAccountName()));
-    }
-    account.address = getBase58CheckAddress(Array.from(accountRaw.getAddress()));
-    account.votesList.map((vote) => {
-      vote.voteAddress = passwordToAddress(vote.voteAddress);
-      return vote;
-    });
-    account.balance = accountRaw.getBalance() / 1000000;
-    account.assetMap = account.assetMap.map(asset => ({
-      name: asset[0],
-      balance: asset[1],
-    }));
-    return account;
+    return deserializeAccount(accountRaw);
   }
 
   /**
@@ -111,8 +90,7 @@ class SolidityGrpcClient {
     accountPag.setLimit(limit);
     accountPag.setOffset(offset);
     const accountRaw = await this.api_extension.getTransactionsToThis(accountPag);
-    const account = deserializeTransactions(accountRaw.getTransactionList());
-    return account;
+    return deserializeTransactions(accountRaw.getTransactionList());
   }
 
   async getTransactionsFromThis(address, limit = 1000, offset = 0) {
@@ -123,8 +101,7 @@ class SolidityGrpcClient {
     accountPag.setLimit(limit);
     accountPag.setOffset(offset);
     const accountRaw = await this.api_extension.getTransactionsFromThis(accountPag);
-    const account = deserializeTransactions(accountRaw.getTransactionList());
-    return account;
+    return deserializeTransactions(accountRaw.getTransactionList());
   }
 }
 
