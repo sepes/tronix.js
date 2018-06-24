@@ -44,6 +44,8 @@ goog.exportSymbol('proto.protocol.Transaction.Contract.ContractType', null, glob
 goog.exportSymbol('proto.protocol.Transaction.Result', null, global);
 goog.exportSymbol('proto.protocol.Transaction.Result.code', null, global);
 goog.exportSymbol('proto.protocol.Transaction.raw', null, global);
+goog.exportSymbol('proto.protocol.TransactionInfo', null, global);
+goog.exportSymbol('proto.protocol.TransactionSign', null, global);
 goog.exportSymbol('proto.protocol.Transactions', null, global);
 goog.exportSymbol('proto.protocol.Vote', null, global);
 goog.exportSymbol('proto.protocol.Votes', null, global);
@@ -4640,6 +4642,253 @@ proto.protocol.Transaction.prototype.clearRetList = function() {
  * @extends {jspb.Message}
  * @constructor
  */
+proto.protocol.TransactionInfo = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.protocol.TransactionInfo, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  proto.protocol.TransactionInfo.displayName = 'proto.protocol.TransactionInfo';
+}
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto suitable for use in Soy templates.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
+ * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
+ *     for transitional soy proto support: http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.protocol.TransactionInfo.prototype.toObject = function(opt_includeInstance) {
+  return proto.protocol.TransactionInfo.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Whether to include the JSPB
+ *     instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.protocol.TransactionInfo} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.protocol.TransactionInfo.toObject = function(includeInstance, msg) {
+  var f, obj = {
+    id: msg.getId_asB64(),
+    fee: jspb.Message.getFieldWithDefault(msg, 2, 0),
+    blocknumber: jspb.Message.getFieldWithDefault(msg, 3, 0),
+    blocktimestamp: jspb.Message.getFieldWithDefault(msg, 4, 0)
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.protocol.TransactionInfo}
+ */
+proto.protocol.TransactionInfo.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.protocol.TransactionInfo;
+  return proto.protocol.TransactionInfo.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.protocol.TransactionInfo} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.protocol.TransactionInfo}
+ */
+proto.protocol.TransactionInfo.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {!Uint8Array} */ (reader.readBytes());
+      msg.setId(value);
+      break;
+    case 2:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setFee(value);
+      break;
+    case 3:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setBlocknumber(value);
+      break;
+    case 4:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setBlocktimestamp(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.protocol.TransactionInfo.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.protocol.TransactionInfo.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.protocol.TransactionInfo} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.protocol.TransactionInfo.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getId_asU8();
+  if (f.length > 0) {
+    writer.writeBytes(
+      1,
+      f
+    );
+  }
+  f = message.getFee();
+  if (f !== 0) {
+    writer.writeInt64(
+      2,
+      f
+    );
+  }
+  f = message.getBlocknumber();
+  if (f !== 0) {
+    writer.writeInt64(
+      3,
+      f
+    );
+  }
+  f = message.getBlocktimestamp();
+  if (f !== 0) {
+    writer.writeInt64(
+      4,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional bytes id = 1;
+ * @return {!(string|Uint8Array)}
+ */
+proto.protocol.TransactionInfo.prototype.getId = function() {
+  return /** @type {!(string|Uint8Array)} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * optional bytes id = 1;
+ * This is a type-conversion wrapper around `getId()`
+ * @return {string}
+ */
+proto.protocol.TransactionInfo.prototype.getId_asB64 = function() {
+  return /** @type {string} */ (jspb.Message.bytesAsB64(
+      this.getId()));
+};
+
+
+/**
+ * optional bytes id = 1;
+ * Note that Uint8Array is not supported on all browsers.
+ * @see http://caniuse.com/Uint8Array
+ * This is a type-conversion wrapper around `getId()`
+ * @return {!Uint8Array}
+ */
+proto.protocol.TransactionInfo.prototype.getId_asU8 = function() {
+  return /** @type {!Uint8Array} */ (jspb.Message.bytesAsU8(
+      this.getId()));
+};
+
+
+/** @param {!(string|Uint8Array)} value */
+proto.protocol.TransactionInfo.prototype.setId = function(value) {
+  jspb.Message.setProto3BytesField(this, 1, value);
+};
+
+
+/**
+ * optional int64 fee = 2;
+ * @return {number}
+ */
+proto.protocol.TransactionInfo.prototype.getFee = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 2, 0));
+};
+
+
+/** @param {number} value */
+proto.protocol.TransactionInfo.prototype.setFee = function(value) {
+  jspb.Message.setProto3IntField(this, 2, value);
+};
+
+
+/**
+ * optional int64 blockNumber = 3;
+ * @return {number}
+ */
+proto.protocol.TransactionInfo.prototype.getBlocknumber = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
+};
+
+
+/** @param {number} value */
+proto.protocol.TransactionInfo.prototype.setBlocknumber = function(value) {
+  jspb.Message.setProto3IntField(this, 3, value);
+};
+
+
+/**
+ * optional int64 blockTimeStamp = 4;
+ * @return {number}
+ */
+proto.protocol.TransactionInfo.prototype.getBlocktimestamp = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
+};
+
+
+/** @param {number} value */
+proto.protocol.TransactionInfo.prototype.setBlocktimestamp = function(value) {
+  jspb.Message.setProto3IntField(this, 4, value);
+};
+
+
+
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
 proto.protocol.Transactions = function(opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, proto.protocol.Transactions.repeatedFields_, null);
 };
@@ -4794,6 +5043,216 @@ proto.protocol.Transactions.prototype.addTransactions = function(opt_value, opt_
 
 proto.protocol.Transactions.prototype.clearTransactionsList = function() {
   this.setTransactionsList([]);
+};
+
+
+
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.protocol.TransactionSign = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.protocol.TransactionSign, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  proto.protocol.TransactionSign.displayName = 'proto.protocol.TransactionSign';
+}
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto suitable for use in Soy templates.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
+ * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
+ *     for transitional soy proto support: http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.protocol.TransactionSign.prototype.toObject = function(opt_includeInstance) {
+  return proto.protocol.TransactionSign.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Whether to include the JSPB
+ *     instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.protocol.TransactionSign} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.protocol.TransactionSign.toObject = function(includeInstance, msg) {
+  var f, obj = {
+    transaction: (f = msg.getTransaction()) && proto.protocol.Transaction.toObject(includeInstance, f),
+    privatekey: msg.getPrivatekey_asB64()
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.protocol.TransactionSign}
+ */
+proto.protocol.TransactionSign.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.protocol.TransactionSign;
+  return proto.protocol.TransactionSign.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.protocol.TransactionSign} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.protocol.TransactionSign}
+ */
+proto.protocol.TransactionSign.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = new proto.protocol.Transaction;
+      reader.readMessage(value,proto.protocol.Transaction.deserializeBinaryFromReader);
+      msg.setTransaction(value);
+      break;
+    case 2:
+      var value = /** @type {!Uint8Array} */ (reader.readBytes());
+      msg.setPrivatekey(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.protocol.TransactionSign.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.protocol.TransactionSign.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.protocol.TransactionSign} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.protocol.TransactionSign.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getTransaction();
+  if (f != null) {
+    writer.writeMessage(
+      1,
+      f,
+      proto.protocol.Transaction.serializeBinaryToWriter
+    );
+  }
+  f = message.getPrivatekey_asU8();
+  if (f.length > 0) {
+    writer.writeBytes(
+      2,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional Transaction transaction = 1;
+ * @return {?proto.protocol.Transaction}
+ */
+proto.protocol.TransactionSign.prototype.getTransaction = function() {
+  return /** @type{?proto.protocol.Transaction} */ (
+    jspb.Message.getWrapperField(this, proto.protocol.Transaction, 1));
+};
+
+
+/** @param {?proto.protocol.Transaction|undefined} value */
+proto.protocol.TransactionSign.prototype.setTransaction = function(value) {
+  jspb.Message.setWrapperField(this, 1, value);
+};
+
+
+proto.protocol.TransactionSign.prototype.clearTransaction = function() {
+  this.setTransaction(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {!boolean}
+ */
+proto.protocol.TransactionSign.prototype.hasTransaction = function() {
+  return jspb.Message.getField(this, 1) != null;
+};
+
+
+/**
+ * optional bytes privateKey = 2;
+ * @return {!(string|Uint8Array)}
+ */
+proto.protocol.TransactionSign.prototype.getPrivatekey = function() {
+  return /** @type {!(string|Uint8Array)} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/**
+ * optional bytes privateKey = 2;
+ * This is a type-conversion wrapper around `getPrivatekey()`
+ * @return {string}
+ */
+proto.protocol.TransactionSign.prototype.getPrivatekey_asB64 = function() {
+  return /** @type {string} */ (jspb.Message.bytesAsB64(
+      this.getPrivatekey()));
+};
+
+
+/**
+ * optional bytes privateKey = 2;
+ * Note that Uint8Array is not supported on all browsers.
+ * @see http://caniuse.com/Uint8Array
+ * This is a type-conversion wrapper around `getPrivatekey()`
+ * @return {!Uint8Array}
+ */
+proto.protocol.TransactionSign.prototype.getPrivatekey_asU8 = function() {
+  return /** @type {!Uint8Array} */ (jspb.Message.bytesAsU8(
+      this.getPrivatekey()));
+};
+
+
+/** @param {!(string|Uint8Array)} value */
+proto.protocol.TransactionSign.prototype.setPrivatekey = function(value) {
+  jspb.Message.setProto3BytesField(this, 2, value);
 };
 
 
@@ -7729,6 +8188,7 @@ proto.protocol.ReasonCode = {
   INCOMPATIBLE_CHAIN: 25,
   TIME_OUT: 32,
   CONNECT_FAIL: 33,
+  TOO_MANY_PEERS_WITH_SAME_IP: 34,
   UNKNOWN: 255
 };
 
