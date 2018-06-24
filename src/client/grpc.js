@@ -1,17 +1,17 @@
-const {
-  EmptyMessage, NumberMessage, BytesMessage, BlockLimit,
-} = require('../protocol/api/api_pb');
-const {
-  getBase58CheckAddress, passwordToAddress, decode58Check,
-} = require('../utils/crypto');
-const { bytesToString } = require('../utils/bytes');
-const { deserializeTransaction } = require('../utils/transaction');
-const { Account } = require('../protocol/core/Tron_pb');
-const { WalletClient } = require('../protocol/api/api_grpc_pb');
 const caller = require('grpc-caller');
+const {
+  EmptyMessage, NumberMessage, BytesMessage, BlockLimit, EasyTransferMessage
+} = require('../protocol/api/api_pb');
+const { WalletClient } = require('../protocol/api/api_grpc_pb');
+const { decode58Check } = require('../utils/crypto');
+const { bytesToString } = require('../utils/bytes');
+const { Account } = require('../protocol/core/Tron_pb');
 const { stringToBytes, hexStr2byteArray, base64DecodeFromString } = require('../lib/code');
 const { deserializeBlock, deserializeBlocks } = require('../utils/block');
 const { deserializeAsset, deserializeAssets } = require('../utils/asset');
+const { deserializeAccount } = require('../utils/account');
+const { deserializeWitnesses } = require('../utils/witness');
+const { deserializeTransaction, deserializeEasyTransfer } = require('../utils/transaction');
 
 class GrpcClient {
   constructor(options) {
@@ -30,13 +30,8 @@ class GrpcClient {
    * @returns {Promise<*>}
    */
   async getWitnesses() {
-    const witnesses = await this.api.listWitnesses(new EmptyMessage())
-      .then(x => x.getWitnessesList());
-    return witnesses.map((w) => {
-      const witness = w.toObject();
-      witness.address = getBase58CheckAddress(Array.from(w.getAddress()));
-      return witness;
-    });
+    const witnesses = await this.api.listWitnesses(new EmptyMessage());
+    return deserializeWitnesses(witnesses);
   }
 
   /**
@@ -71,21 +66,7 @@ class GrpcClient {
     const accountArg = new Account();
     accountArg.setAddress(new Uint8Array(decode58Check(address)));
     const accountRaw = await this.api.getAccount(accountArg);
-    const account = accountRaw.toObject();
-    if (account.accountName.length > 0) {
-      account.accountName = bytesToString(Array.from(accountRaw.getAccountName()));
-    }
-    account.address = getBase58CheckAddress(Array.from(accountRaw.getAddress()));
-    account.votesList.map((vote) => {
-      vote.voteAddress = passwordToAddress(vote.voteAddress);
-      return vote;
-    });
-    account.balance = accountRaw.getBalance() / 1000000;
-    account.assetMap = account.assetMap.map(asset => ({
-      name: asset[0],
-      balance: asset[1],
-    }));
-    return account;
+    return deserializeAccount(accountRaw);
   }
 
   /**
@@ -148,6 +129,15 @@ class GrpcClient {
     broadcastTransactionAnswer = broadcastTransactionAnswer.toObject();
     broadcastTransactionAnswer.message = bytesToString(Array.from(base64DecodeFromString(broadcastTransactionAnswer.message)));
     return broadcastTransactionAnswer;
+  }
+
+  async easyTransfer(passPhrase, toAddress, amount) {
+    const easyTransferMessage = new EasyTransferMessage();
+    easyTransferMessage.setPassphrase(Uint8Array.from(passPhrase));
+    easyTransferMessage.setToaddress(Uint8Array.from(decode58Check(toAddress)));
+    easyTransferMessage.setAmount(amount);
+    const result = await this.api.easyTransfer(easyTransferMessage);
+    return deserializeEasyTransfer(result);
   }
 }
 

@@ -93,6 +93,12 @@ function deserializeTransactions(transactionsList = []) {
   return transactionsList.map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
 }
 
+function deserializeEasyTransfer(transferResult) {
+  const result = transferResult.toObject();
+  result.result.message = bytesToString(Array.from(base64DecodeFromString(result.result.message)));
+  return result;
+}
+
 function encodeString(str) {
   return Uint8Array.from(base64DecodeFromString(btoa(str)));
 }
@@ -479,4 +485,5 @@ module.exports = {
   signTransaction,
   deserializeTransaction,
   deserializeTransactions,
+  deserializeEasyTransfer,
 };
