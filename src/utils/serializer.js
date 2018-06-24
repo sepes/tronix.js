@@ -60,6 +60,7 @@ function deserializeTransaction(tx) {
     });
     return transactions;
   } catch (err) {
+    console.error(err);
     return [null];
   }
 }
