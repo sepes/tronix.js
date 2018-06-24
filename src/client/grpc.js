@@ -1,6 +1,6 @@
 const caller = require('grpc-caller');
 const {
-  EmptyMessage, NumberMessage, BytesMessage, BlockLimit,
+  EmptyMessage, NumberMessage, BytesMessage, BlockLimit, EasyTransferMessage
 } = require('../protocol/api/api_pb');
 const { WalletClient } = require('../protocol/api/api_grpc_pb');
 const { decode58Check } = require('../utils/crypto');
@@ -11,7 +11,7 @@ const { deserializeBlock, deserializeBlocks } = require('../utils/block');
 const { deserializeAsset, deserializeAssets } = require('../utils/asset');
 const { deserializeAccount } = require('../utils/account');
 const { deserializeWitnesses } = require('../utils/witness');
-const { deserializeTransaction } = require('../utils/transaction');
+const { deserializeTransaction, deserializeEasyTransfer } = require('../utils/transaction');
 
 class GrpcClient {
   constructor(options) {
@@ -129,6 +129,15 @@ class GrpcClient {
     broadcastTransactionAnswer = broadcastTransactionAnswer.toObject();
     broadcastTransactionAnswer.message = bytesToString(Array.from(base64DecodeFromString(broadcastTransactionAnswer.message)));
     return broadcastTransactionAnswer;
+  }
+
+  async easyTransfer(passPhrase, toAddress, amount) {
+    const easyTransferMessage = new EasyTransferMessage();
+    easyTransferMessage.setPassphrase(Uint8Array.from(passPhrase));
+    easyTransferMessage.setToaddress(Uint8Array.from(decode58Check(toAddress)));
+    easyTransferMessage.setAmount(amount);
+    const result = await this.api.easyTransfer(easyTransferMessage);
+    return deserializeEasyTransfer(result);
   }
 }
 
