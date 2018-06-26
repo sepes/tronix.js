@@ -2,6 +2,8 @@ const caller = require('grpc-caller');
 const {
   EmptyMessage, BytesMessage, NumberMessage, AccountPaginated,
 } = require('../protocol/api/api_pb');
+
+const { hexStr2byteArray } = require('../lib/code');
 const { decode58Check } = require('../utils/crypto');
 const { Account } = require('../protocol/core/Tron_pb');
 const { WalletSolidityClient, WalletExtensionClient } = require('../protocol/api/api_grpc_pb');
@@ -9,7 +11,7 @@ const { deserializeBlock } = require('../utils/block');
 const { deserializeAssets } = require('../utils/asset');
 const { deserializeAccount } = require('../utils/account');
 const { deserializeWitnesses } = require('../utils/witness');
-const { deserializeTransactions } = require('../utils/transaction');
+const { deserializeTransaction, deserializeTransactions } = require('../utils/transaction');
 
 class SolidityGrpcClient {
   constructor(options) {

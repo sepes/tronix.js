@@ -51,6 +51,10 @@ const TransactionFields = {
   toAddress(address) { return this.decodeAddress(address); },
   voteAddress(address) { return this.decodeAddress(address); },
   assetName(token) { return bytesToString(Array.from(base64DecodeFromString(token))); },
+  amount(amount, type) {
+    if (type === ContractType.TRANSFERCONTRACT) return amount / 1000000;
+    return amount;
+  },
 };
 
 function decodeTransactionFields(transaction) {
@@ -59,7 +63,7 @@ function decodeTransactionFields(transaction) {
     if (Array.isArray(transactionResult[key])) {
       transactionResult[key].forEach(decodeTransactionFields);
     } else if (TransactionFields[key]) {
-      transactionResult[key] = TransactionFields[key](transactionResult[key]);
+      transactionResult[key] = TransactionFields[key](transactionResult[key],transaction.contractType);
     }
   });
   return transactionResult;
@@ -77,7 +81,7 @@ function deserializeTransaction(tx) {
       let transaction = any.unpack(ContractTable[contractType][0], ContractTable[contractType][1]);
       transaction = transaction.toObject();
       transaction.contractType = contractType;
-      transaction.hash = byteArray2hexStr(SHA256(tx.getRawData().serializeBinary()));
+      transaction.hash = byteArray2hexStr(SHA256(tx.getRawData().serializeBinary())).toLowerCase();
       transaction.time = tx.getRawData().getTimestamp();
       transaction = decodeTransactionFields(transaction);
       transactions.push(transaction);
@@ -126,7 +130,6 @@ function buildTransferContract(message, contractType, typeName) {
 
   const raw = new Transaction.raw();
   raw.addContract(contract);
-  // raw.setTimestamp(new Date().getTime() * 1000000);
 
   const transaction = new Transaction();
   transaction.setRawData(raw);
