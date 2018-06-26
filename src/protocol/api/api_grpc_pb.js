@@ -5,7 +5,7 @@ var grpc = require('grpc');
 var api_api_pb = require('../api/api_pb.js');
 var core_Tron_pb = require('../core/Tron_pb.js');
 var core_Contract_pb = require('../core/Contract_pb.js');
-// var google_api_annotations_pb = require('../google/api/annotations_pb.js');
+//var google_api_annotations_pb = require('../google/api/annotations_pb.js');
 
 function serialize_protocol_Account(arg) {
   if (!(arg instanceof core_Tron_pb.Account)) {
@@ -60,6 +60,17 @@ function serialize_protocol_AccountUpdateContract(arg) {
 
 function deserialize_protocol_AccountUpdateContract(buffer_arg) {
   return core_Contract_pb.AccountUpdateContract.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_protocol_AddressPrKeyPairMessage(arg) {
+  if (!(arg instanceof api_api_pb.AddressPrKeyPairMessage)) {
+    throw new Error('Expected argument of type protocol.AddressPrKeyPairMessage');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_protocol_AddressPrKeyPairMessage(buffer_arg) {
+  return api_api_pb.AddressPrKeyPairMessage.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 function serialize_protocol_AssetIssueContract(arg) {
@@ -782,6 +793,18 @@ var WalletService = exports.WalletService = {
     responseSerialize: serialize_protocol_EasyTransferResponse,
     responseDeserialize: deserialize_protocol_EasyTransferResponse,
   },
+  // Warning: do not invoke this interface provided by others.
+  generateAddress: {
+    path: '/protocol.Wallet/GenerateAddress',
+    requestStream: false,
+    responseStream: false,
+    requestType: api_api_pb.EmptyMessage,
+    responseType: api_api_pb.AddressPrKeyPairMessage,
+    requestSerialize: serialize_protocol_EmptyMessage,
+    requestDeserialize: deserialize_protocol_EmptyMessage,
+    responseSerialize: serialize_protocol_AddressPrKeyPairMessage,
+    responseDeserialize: deserialize_protocol_AddressPrKeyPairMessage,
+  },
 };
 
 exports.WalletClient = grpc.makeGenericClientConstructor(WalletService);
@@ -873,6 +896,18 @@ var WalletSolidityService = exports.WalletSolidityService = {
     requestDeserialize: deserialize_protocol_BytesMessage,
     responseSerialize: serialize_protocol_TransactionInfo,
     responseDeserialize: deserialize_protocol_TransactionInfo,
+  },
+  // Warning: do not invoke this interface provided by others.
+  generateAddress: {
+    path: '/protocol.WalletSolidity/GenerateAddress',
+    requestStream: false,
+    responseStream: false,
+    requestType: api_api_pb.EmptyMessage,
+    responseType: api_api_pb.AddressPrKeyPairMessage,
+    requestSerialize: serialize_protocol_EmptyMessage,
+    requestDeserialize: deserialize_protocol_EmptyMessage,
+    responseSerialize: serialize_protocol_AddressPrKeyPairMessage,
+    responseDeserialize: deserialize_protocol_AddressPrKeyPairMessage,
   },
 };
 
