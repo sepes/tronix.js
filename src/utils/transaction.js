@@ -28,6 +28,7 @@ const {
 const ContractType = Transaction.Contract.ContractType;
 const ContractTable = {};
 ContractTable[ContractType.ACCOUNTCREATECONTRACT] = [AccountCreateContract.deserializeBinary, 'protocol.AccountCreateContract'];
+ContractTable[ContractType.ACCOUNTUPDATECONTRACT] = [AccountUpdateContract.deserializeBinary, 'protocol.AccountUpdateContract'];
 ContractTable[ContractType.TRANSFERCONTRACT] = [TransferContract.deserializeBinary, 'protocol.TransferContract'];
 ContractTable[ContractType.TRANSFERASSETCONTRACT] = [TransferAssetContract.deserializeBinary, 'protocol.TransferAssetContract'];
 ContractTable[ContractType.VOTEASSETCONTRACT] = [VoteAssetContract.deserializeBinary, 'protocol.VoteAssetContract'];
