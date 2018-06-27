@@ -1,45 +1,54 @@
-<h1 align="center">
-  	tronix.js
-	<br>
-</h1>
+# tronix.js
 
-<h4 align="center">
-  Javascript API for the <a href="https://tron.network">Tron Protocol</a>
-</h4>
+Javascript API for the Tron Protocol via GRPC
 
-<p align="center">
-  <a href="#how-to-use">How to Use</a> •
-  <a href="#links">Links</a> •
-  <a href="http://wiki.tron.network">Wiki</a> •
-  <a href="#community">Community</a>
-</p>
+## Installation
 
-# How to use
+`npm install --save tronix.js`
 
-WIP
+## Usage
 
-## Requirements
+```javascript
+const { GrpcClient, SolidityGrpcClient } = require('tronix.js');
 
-* Node >= v8
+const client = new GrpcClient({
+  hostname: '99.99.99.99',
+  port: 50051,
+});
 
-# Community
+const solidityClient = new SolidityGrpcClient({
+  hostname: '88.88.88.88',
+  port: 50051,
+});
 
-* [Slack](https://join.slack.com/t/tronfoundation/shared_invite/enQtMzAzNzg4NTI4NDM3LTAyZGQzMzEzMjNkNDU0ZjNkNTA4OTYyNTA5YWZmYjE3MTEyOWZhNzljNzQwODM3NDQ0OWRiMTIyMDhlYzgyOGQ)
-* [Telegram](https://t.me/tronnetworkEN)
+async function run() {
+  const blcknumber = await client.getBlockByNumber(1234);
+  const blck = await client.getNowBlock();
+  const assets = await solidityClient.getAssetIssueList();
+}
 
-# Links
+run();
+```
 
-* [Website](https://tron.network/)
-* [Documentation](https://github.com/tronprotocol/java-tron)
-* [Blog](https://tronprotocol.github.io/tron-blog/)
-* [TRON Wiki](http://wiki.tron.network/en/latest/)
+You can check a public list of TRON nodes here: [Official_Public_Node.md](https://github.com/tronprotocol/Documentation/blob/master/TRX/Official_Public_Node.md)
 
-# Projects
+## Contributing
 
-* [TRON Protocol](https://github.com/tronprotocol/protocol)
-* [Wallet Client](https://github.com/tronprotocol/wallet-cli)
-* [Wallet Web](https://github.com/tronprotocol/Wallet_Web)
+1. Fork it!
+2. Create your feature branch: `git checkout -b my-new-feature`
+3. Commit your changes: `git commit -am 'Add some feature'`
+4. Push to the branch: `git push origin my-new-feature`
+5. Submit a pull request :D
 
-# Authors
-* [Santiago de los Santos](http://github.com/santiagodls)
+## Credits
+
 * [Daniel Blanco](https://github.com/deblanco)
+* [Santiago de los Santos](http://github.com/santiagodls)
+* Special contributors
+  * [AngelMQ](https://github.com/AngelQuirogaM) 
+  * [Rovak](https://github.com/rovak) (Original project)
+
+
+## License
+
+LGPL-3.0
