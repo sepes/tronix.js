@@ -102,7 +102,7 @@ class GrpcClient {
    *
    * @returns {Promise<*>}
    */
-  async getLatestBlock() {
+  async getNowBlock() {
     const lastBlockRaw = await this.api.getNowBlock(new EmptyMessage());
     return deserializeBlock(lastBlockRaw);
   }
@@ -131,14 +131,14 @@ class GrpcClient {
     return broadcastTransactionAnswer;
   }
 
-  // async easyTransfer(passPhrase, toAddress, amount) {
-  //   const easyTransferMessage = new EasyTransferMessage();
-  //   easyTransferMessage.setPassphrase(passPhrase);
-  //   easyTransferMessage.setToaddress(Uint8Array.from(decode58Check(toAddress)));
-  //   easyTransferMessage.setAmount(amount);
-  //   const result = await this.api.easyTransfer(easyTransferMessage);
-  //   return deserializeEasyTransfer(result);
-  // }
+  async easyTransfer(passPhrase, toAddress, amount) {
+    const easyTransferMessage = new EasyTransferMessage();
+    easyTransferMessage.setPassphrase(passPhrase);
+    easyTransferMessage.setToaddress(Uint8Array.from(decode58Check(toAddress)));
+    easyTransferMessage.setAmount(amount);
+    const result = await this.api.easyTransfer(easyTransferMessage);
+    return deserializeEasyTransfer(result);
+  }
 
   async generateAddress() {
     const newAddress = await this.api.generateAddress(new EmptyMessage());
