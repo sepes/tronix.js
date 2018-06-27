@@ -28,12 +28,14 @@ const {
 const ContractType = Transaction.Contract.ContractType;
 const ContractTable = {};
 ContractTable[ContractType.ACCOUNTCREATECONTRACT] = [AccountCreateContract.deserializeBinary, 'protocol.AccountCreateContract'];
+ContractTable[ContractType.ACCOUNTUPDATECONTRACT] = [AccountUpdateContract.deserializeBinary, 'protocol.AccountUpdateContract'];
 ContractTable[ContractType.TRANSFERCONTRACT] = [TransferContract.deserializeBinary, 'protocol.TransferContract'];
 ContractTable[ContractType.TRANSFERASSETCONTRACT] = [TransferAssetContract.deserializeBinary, 'protocol.TransferAssetContract'];
 ContractTable[ContractType.VOTEASSETCONTRACT] = [VoteAssetContract.deserializeBinary, 'protocol.VoteAssetContract'];
 ContractTable[ContractType.VOTEWITNESSCONTRACT] = [VoteWitnessContract.deserializeBinary, 'protocol.VoteWitnessContract'];
 ContractTable[ContractType.ASSETISSUECONTRACT] = [AssetIssueContract.deserializeBinary, 'protocol.AssetIssueContract'];
 ContractTable[ContractType.DEPLOYCONTRACT] = [DeployContract.deserializeBinary, 'protocol.DeployContract'];
+ContractTable[ContractType.WITNESSCREATECONTRACT] = [WitnessCreateContract.deserializeBinary, 'protocol.WitnessCreateContract'];
 ContractTable[ContractType.WITNESSUPDATECONTRACT] = [WitnessUpdateContract.deserializeBinary, 'protocol.WitnessUpdateContract'];
 ContractTable[ContractType.PARTICIPATEASSETISSUECONTRACT] = [ParticipateAssetIssueContract.deserializeBinary, 'protocol.ParticipateAssetIssueContract'];
 ContractTable[ContractType.FREEZEBALANCECONTRACT] = [FreezeBalanceContract.deserializeBinary, 'protocol.FreezeBalanceContract'];
