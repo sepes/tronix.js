@@ -1,6 +1,6 @@
 const caller = require('grpc-caller');
 const {
-  EmptyMessage, NumberMessage, BytesMessage, BlockLimit, EasyTransferMessage
+  EmptyMessage, NumberMessage, BytesMessage, BlockLimit, EasyTransferMessage,
 } = require('../protocol/api/api_pb');
 const { WalletClient } = require('../protocol/api/api_grpc_pb');
 const { decode58Check } = require('../utils/crypto');
@@ -11,7 +11,7 @@ const { deserializeBlock, deserializeBlocks } = require('../utils/block');
 const { deserializeAsset, deserializeAssets } = require('../utils/asset');
 const { deserializeAccount } = require('../utils/account');
 const { deserializeWitnesses } = require('../utils/witness');
-const { deserializeTransaction, deserializeEasyTransfer } = require('../utils/transaction');
+const { deserializeTransaction, deserializeEasyTransfer, decodeTransactionFields } = require('../utils/transaction');
 
 class GrpcClient {
   constructor(options) {
@@ -111,7 +111,7 @@ class GrpcClient {
     const txByte = new BytesMessage();
     txByte.setValue(new Uint8Array(hexStr2byteArray(txHash.toUpperCase())));
     const transaction = await this.api.getTransactionById(txByte);
-    return deserializeTransaction(transaction)[0];
+    return deserializeTransaction(transaction);
   }
 
   async getTotalTransaction() {
@@ -133,7 +133,7 @@ class GrpcClient {
 
   async easyTransfer(passPhrase, toAddress, amount) {
     const easyTransferMessage = new EasyTransferMessage();
-    easyTransferMessage.setPassphrase(passPhrase);
+    easyTransferMessage.setPassphrase(new Uint8Array(stringToBytes(passPhrase)));
     easyTransferMessage.setToaddress(Uint8Array.from(decode58Check(toAddress)));
     easyTransferMessage.setAmount(amount);
     const result = await this.api.easyTransfer(easyTransferMessage);
@@ -143,6 +143,16 @@ class GrpcClient {
   async generateAddress() {
     const newAddress = await this.api.generateAddress(new EmptyMessage());
     return newAddress.toObject();
+  }
+
+  async createAdresss(randomString) {
+    const randomByte = new BytesMessage();
+    randomByte.setValue(new Uint8Array(stringToBytes(randomString)));
+    const newAddress = await this.api.createAdresss(randomByte);
+    const newAddressResult = newAddress.toObject();
+    return decodeTransactionFields({
+      address: newAddressResult.value,
+    });
   }
 }
 

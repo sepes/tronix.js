@@ -52,6 +52,7 @@ const TransactionFields = {
   ownerAddress(address) { return this.decodeAddress(address); },
   toAddress(address) { return this.decodeAddress(address); },
   voteAddress(address) { return this.decodeAddress(address); },
+  address(address) { return this.decodeAddress(address); },
   assetName(token) { return bytesToString(Array.from(base64DecodeFromString(token))); },
   amount(amount, type) {
     if (type === ContractType.TRANSFERCONTRACT) return amount / 1000000;
@@ -72,37 +73,32 @@ function decodeTransactionFields(transaction) {
 }
 
 function deserializeTransaction(tx) {
+  if (!tx) return null;
   try {
-    const contractList = tx.getRawData().getContractList();
-    const transactions = [];
-
-    contractList.forEach((contract) => {
-      const any = contract.getParameter();
-
-      const contractType = contract.getType();
-      let transaction = any.unpack(ContractTable[contractType][0], ContractTable[contractType][1]);
-      transaction = transaction.toObject();
-      transaction.contractType = contractType;
-      transaction.hash = byteArray2hexStr(SHA256(tx.getRawData().serializeBinary())).toLowerCase();
-      transaction.time = tx.getRawData().getTimestamp();
-      transaction = decodeTransactionFields(transaction);
-      transactions.push(transaction);
-    });
-    return transactions;
+    const contract = tx.getRawData().getContractList()[0];
+    const any = contract.getParameter();
+    const contractType = contract.getType();
+    let transaction = any.unpack(ContractTable[contractType][0], ContractTable[contractType][1]);
+    transaction = transaction.toObject();
+    transaction.contractType = contractType;
+    transaction.hash = byteArray2hexStr(SHA256(tx.getRawData().serializeBinary())).toLowerCase();
+    transaction.time = tx.getRawData().getTimestamp();
+    transaction = decodeTransactionFields(transaction);
+    return transaction;
   } catch (err) {
-    console.error(err);
-    return [null];
+    throw err;
   }
 }
 
 function deserializeTransactions(transactionsList = []) {
-  return transactionsList.map(tx => deserializeTransaction(tx)[0]).filter(t => !!t);
+  return transactionsList.map(tx => deserializeTransaction(tx)).filter(t => !!t);
 }
 
 function deserializeEasyTransfer(transferResult) {
-  const result = transferResult.toObject();
-  result.result.message = bytesToString(Array.from(base64DecodeFromString(result.result.message)));
-  return result;
+  const easyObject = transferResult.toObject();
+  easyObject.result.message = bytesToString(Array.from(base64DecodeFromString(easyObject.result.message)));
+  easyObject.transaction = deserializeTransaction(transferResult.getTransaction());
+  return easyObject;
 }
 
 function encodeString(str) {
@@ -488,6 +484,7 @@ module.exports = {
   buildUnfreezeAssetTransaction,
   addBlockReferenceToTransaction,
   signTransaction,
+  decodeTransactionFields,
   deserializeTransaction,
   deserializeTransactions,
   deserializeEasyTransfer,

@@ -81,7 +81,7 @@ class SolidityGrpcClient {
     const txByte = new BytesMessage();
     txByte.setValue(new Uint8Array(hexStr2byteArray(txHash.toUpperCase())));
     const transaction = await this.api.getTransactionById(txByte);
-    return deserializeTransaction(transaction)[0];
+    return deserializeTransaction(transaction);
   }
 
   async getTransactionsToThis(address, limit = 1000, offset = 0) {
