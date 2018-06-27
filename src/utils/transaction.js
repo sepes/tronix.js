@@ -35,6 +35,7 @@ ContractTable[ContractType.VOTEASSETCONTRACT] = [VoteAssetContract.deserializeBi
 ContractTable[ContractType.VOTEWITNESSCONTRACT] = [VoteWitnessContract.deserializeBinary, 'protocol.VoteWitnessContract'];
 ContractTable[ContractType.ASSETISSUECONTRACT] = [AssetIssueContract.deserializeBinary, 'protocol.AssetIssueContract'];
 ContractTable[ContractType.DEPLOYCONTRACT] = [DeployContract.deserializeBinary, 'protocol.DeployContract'];
+ContractTable[ContractType.WITNESSCREATECONTRACT] = [WitnessCreateContract.deserializeBinary, 'protocol.WitnessCreateContract'];
 ContractTable[ContractType.WITNESSUPDATECONTRACT] = [WitnessUpdateContract.deserializeBinary, 'protocol.WitnessUpdateContract'];
 ContractTable[ContractType.PARTICIPATEASSETISSUECONTRACT] = [ParticipateAssetIssueContract.deserializeBinary, 'protocol.ParticipateAssetIssueContract'];
 ContractTable[ContractType.FREEZEBALANCECONTRACT] = [FreezeBalanceContract.deserializeBinary, 'protocol.FreezeBalanceContract'];
