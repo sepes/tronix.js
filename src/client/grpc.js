@@ -169,10 +169,13 @@ class GrpcClient {
     return sendTransaction.toObject();
   }
 
-  async voteWitnessAccount(fromAddress, votes) {
-    const voteObj = buildVoteTransaction(fromAddress, votes);
-    const voteCall = await this.api.voteWitnessAccount(voteObj);
-    return deserializeTransaction(voteCall);
+  async voteWitnessAccount(priKey, fromAddress, votes) {
+    const voteTransaction = buildVoteTransaction(fromAddress, votes);
+    const nowBlock = await this.getNowBlock();
+    const referredTransaction = addBlockReferenceToTransaction(voteTransaction, nowBlock);
+    const signedTransaction = signTransaction(referredTransaction, priKey);
+    const sendTransaction = await this.api.broadcastTransaction(signedTransaction);
+    return sendTransaction.toObject();
   }
 }
 
