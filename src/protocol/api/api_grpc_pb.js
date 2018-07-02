@@ -195,9 +195,9 @@ function deserialize_protocol_EmptyMessage(buffer_arg) {
 }
 
 function serialize_protocol_FreezeBalanceContract(arg) {
-  if (!(arg instanceof core_Contract_pb.FreezeBalanceContract)) {
-    throw new Error('Expected argument of type protocol.FreezeBalanceContract');
-  }
+  // if (!(arg instanceof core_Contract_pb.FreezeBalanceContract)) {
+  //   throw new Error('Expected argument of type protocol.FreezeBalanceContract');
+  // }
   return new Buffer(arg.serializeBinary());
 }
 

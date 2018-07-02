@@ -1,6 +1,7 @@
 {
   "name": "tronix.js",
   "version": "0.0.1",
+  "author": "deblanco",
   "description": "TRONIX Javascript API interface",
   "main": "src/index.js",
   "homepage": "https://github.com/deblanco/tronix.js",

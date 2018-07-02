@@ -11,7 +11,11 @@ const { deserializeBlock, deserializeBlocks } = require('../utils/block');
 const { deserializeAsset, deserializeAssets } = require('../utils/asset');
 const { deserializeAccount } = require('../utils/account');
 const { deserializeWitnesses } = require('../utils/witness');
-const { deserializeTransaction, deserializeEasyTransfer, decodeTransactionFields } = require('../utils/transaction');
+const {
+  deserializeTransaction, deserializeEasyTransfer,
+  decodeTransactionFields, buildFreezeBalanceTransaction,
+  buildVoteTransaction,
+} = require('../utils/transaction');
 
 class GrpcClient {
   constructor(options) {
@@ -153,6 +157,18 @@ class GrpcClient {
     return decodeTransactionFields({
       address: newAddressResult.value,
     });
+  }
+
+  async freezeBalance(address, amount, duration) {
+    const freezeTransaction = buildFreezeBalanceTransaction(address, amount, duration);
+    const execTransaction = await this.api.freezeBalance(freezeTransaction);
+    return deserializeTransaction(execTransaction);
+  }
+
+  async voteWitnessAccount(fromAddress, votes) {
+    const voteObj = buildVoteTransaction(fromAddress, votes);
+    const voteCall = await this.api.voteWitnessAccount(voteObj);
+    return deserializeTransaction(voteCall);
   }
 }
 

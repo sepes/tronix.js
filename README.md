@@ -32,6 +32,10 @@ run();
 
 You can check a public list of TRON nodes here: [Official_Public_Node.md](https://github.com/tronprotocol/Documentation/blob/master/TRX/Official_Public_Node.md)
 
+## Full/Solidity Node REST Gateway
+
+Find a full example of use below, It will build a full REST API of your node automatically: [tronix.js-gateway](https://github.com/deblanco/tronix.js-gateway)
+
 ## Contributing
 
 1. Fork it!
