@@ -1,4 +1,5 @@
 const caller = require('grpc-caller');
+const { applyClassDecorator, requireAllParams } = require('../utils/decorators');
 const {
   EmptyMessage, NumberMessage, BytesMessage, BlockLimit, EasyTransferMessage,
 } = require('../protocol/api/api_pb');
@@ -14,7 +15,7 @@ const { deserializeWitnesses } = require('../utils/witness');
 const {
   deserializeTransaction, deserializeEasyTransfer,
   decodeTransactionFields, buildFreezeBalanceTransaction,
-  buildVoteTransaction,
+  buildVoteTransaction, addBlockReferenceToTransaction, signTransaction,
 } = require('../utils/transaction');
 
 class GrpcClient {
@@ -159,10 +160,13 @@ class GrpcClient {
     });
   }
 
-  async freezeBalance(address, amount, duration) {
+  async freezeBalance(priKey, address, amount, duration) {
     const freezeTransaction = buildFreezeBalanceTransaction(address, amount, duration);
-    const execTransaction = await this.api.freezeBalance(freezeTransaction);
-    return deserializeTransaction(execTransaction);
+    const nowBlock = await this.getNowBlock();
+    const referredTransaction = addBlockReferenceToTransaction(freezeTransaction, nowBlock);
+    const signedTransaction = signTransaction(referredTransaction, priKey);
+    const sendTransaction = await this.api.broadcastTransaction(signedTransaction);
+    return sendTransaction.toObject();
   }
 
   async voteWitnessAccount(fromAddress, votes) {
@@ -172,4 +176,4 @@ class GrpcClient {
   }
 }
 
-module.exports = GrpcClient;
+module.exports = applyClassDecorator(GrpcClient, requireAllParams);
